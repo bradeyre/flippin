@@ -1,0 +1,208 @@
+import { anthropic, CLAUDE_MODEL } from './client';
+
+export interface VisionAnalysisResult {
+  prohibited?: boolean;
+  prohibitionReason?: string;
+  brand: string;
+  model: string;
+  variant?: string;
+  category: string;
+  condition: 'NEW' | 'LIKE_NEW' | 'GOOD' | 'FAIR' | 'POOR';
+  detectedIssues: string[];
+  authenticity: 'LIKELY_GENUINE' | 'QUESTIONABLE' | 'LIKELY_FAKE';
+  confidence: number;
+  needsMoreInfo: boolean;
+  suggestedQuestions?: string[];
+}
+
+export async function analyzeProductImages(
+  imageUrls: string[],
+  userTitle?: string,
+  userDescription?: string
+): Promise<VisionAnalysisResult> {
+
+  const prompt = `You are analyzing product images for a South African marketplace that ships via courier.
+
+${userTitle ? `User title: "${userTitle}"` : ''}
+${userDescription ? `User description: "${userDescription}"` : ''}
+
+CRITICAL SAFETY & POLICY CHECKS FIRST:
+
+1. **Prohibited Items** (MUST set prohibited: true):
+   - Weapons, firearms, ammunition, explosives
+   - Drugs, narcotics, prescription medication
+   - Alcohol, tobacco, vaping products
+   - Animals, pets, livestock
+   - Stolen goods, counterfeits, fakes
+   - Adult/inappropriate content
+   - Hazardous materials, chemicals
+
+2. **Oversized Items** (MUST set prohibited: true with reason "too large for courier"):
+   - Vehicles (cars, motorcycles, boats)
+   - Large furniture (couches, beds, desks, tables)
+   - Large appliances (refrigerators, washing machines, stoves)
+
+If item is prohibited or oversized, return:
+{
+  "prohibited": true,
+  "prohibitionReason": "clear reason why",
+  ... (fill in other fields with best guess)
+}
+
+Otherwise, analyze and extract:
+
+1. **Brand**: Manufacturer (e.g., "Apple", "Samsung", "Leatherman")
+2. **Model**: Specific model (e.g., "iPhone 13 Pro", "Charge TTI")
+3. **Variant**: Storage/color if visible (e.g., "256GB Space Gray")
+4. **Category**: Product category (e.g., "Smartphones", "Multi-tools", "Laptops")
+5. **Condition**: NEW, LIKE_NEW, GOOD, FAIR, or POOR based on visible wear
+6. **Detected Issues**: List visible damage/wear
+7. **Authenticity**: LIKELY_GENUINE, QUESTIONABLE, or LIKELY_FAKE
+8. **Confidence**: 0.0 to 1.0 (how certain you are)
+9. **NeedsMoreInfo**: true if you need more photos/details to be certain
+10. **SuggestedQuestions**: Questions to ask seller for clarity (if needsMoreInfo is true)
+
+Return ONLY valid JSON:
+{
+  "brand": "Apple",
+  "model": "iPhone 13 Pro",
+  "variant": "256GB Space Gray",
+  "category": "Smartphones",
+  "condition": "GOOD",
+  "detectedIssues": ["Minor scratches on corners"],
+  "authenticity": "LIKELY_GENUINE",
+  "confidence": 0.9,
+  "needsMoreInfo": false,
+  "suggestedQuestions": []
+}
+
+If you can't determine model/storage from photos:
+{
+  "brand": "Apple",
+  "model": "iPhone (model unclear)",
+  "category": "Smartphones",
+  "condition": "GOOD",
+  "detectedIssues": [],
+  "authenticity": "LIKELY_GENUINE",
+  "confidence": 0.5,
+  "needsMoreInfo": true,
+  "suggestedQuestions": [
+    "What iPhone model is this? (iPhone 13 Pro, iPhone 14, etc.)",
+    "What storage capacity? (128GB, 256GB, 512GB, 1TB)",
+    "What is the battery health percentage? (Go to Settings > Battery > Battery Health)",
+    "Can you upload a photo of Settings > General > About (shows IMEI & storage)?"
+  ]
+}`;
+
+  // Convert image URLs to appropriate format for Claude
+  const imageContent = imageUrls.map(url => {
+    // Check if it's a data URL (base64)
+    if (url.startsWith('data:image/')) {
+      const [header, base64Data] = url.split(',');
+      const mediaType = header.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+
+      console.log('Processing base64 image:', {
+        mediaType,
+        dataLength: base64Data?.length,
+        headerSample: header.substring(0, 50),
+      });
+
+      return {
+        type: 'image' as const,
+        source: {
+          type: 'base64' as const,
+          media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+          data: base64Data,
+        },
+      };
+    } else {
+      // It's a regular URL
+      console.log('Processing URL image:', url.substring(0, 100));
+      return {
+        type: 'image' as const,
+        source: { type: 'url' as const, url },
+      };
+    }
+  });
+
+  console.log('Calling Anthropic API with', imageContent.length, 'images');
+
+  let response;
+  try {
+    response = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            ...imageContent,
+            { type: 'text' as const, text: prompt },
+          ],
+        },
+      ],
+    });
+
+    console.log('Anthropic API response received');
+  } catch (apiError) {
+    console.error('Anthropic API error:', apiError);
+    throw apiError;
+  }
+
+  const textContent = response.content.find(c => c.type === 'text');
+  if (!textContent || textContent.type !== 'text') {
+    throw new Error('No text response from Claude');
+  }
+
+  const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('Invalid JSON response from AI');
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+export async function analyzeAdditionalPhotos(
+  existingAnalysis: VisionAnalysisResult,
+  additionalImageUrls: string[],
+  userAnswers?: Record<string, string>
+): Promise<VisionAnalysisResult> {
+
+  const prompt = `Previous analysis of this item:
+${JSON.stringify(existingAnalysis, null, 2)}
+
+${userAnswers ? `User provided answers:\n${JSON.stringify(userAnswers, null, 2)}` : ''}
+
+Now analyzing additional photos provided by the seller.
+
+Update the analysis with any new information. Return complete updated JSON in same format.`;
+
+  const response = await anthropic.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          ...additionalImageUrls.map(url => ({
+            type: 'image' as const,
+            source: { type: 'url' as const, url },
+          })),
+          { type: 'text' as const, text: prompt },
+        ],
+      },
+    ],
+  });
+
+  const textContent = response.content.find(c => c.type === 'text');
+  if (!textContent || textContent.type !== 'text') {
+    throw new Error('No text response from Claude');
+  }
+
+  const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('Invalid JSON response from AI');
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
