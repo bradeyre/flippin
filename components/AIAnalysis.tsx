@@ -21,6 +21,7 @@ export function AIAnalysis({ analysis, pricing, answers, onConfirm, onEdit }: AI
       model: analysis.model,
       variant: analysis.variant,
       condition: analysis.condition,
+      category: analysis.category,
       specs: answers,
     });
   }

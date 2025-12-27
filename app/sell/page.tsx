@@ -8,7 +8,7 @@ import { QualifyingQuestions } from '@/components/QualifyingQuestions';
 import { InstantOffers } from '@/components/InstantOffers';
 import { DistributionOptions } from '@/components/DistributionOptions';
 
-type Step = 'upload' | 'analyzing' | 'questions' | 'confirm' | 'offers' | 'distribution' | 'complete';
+type Step = 'upload' | 'analyzing' | 'questions' | 'confirm' | 'delivery' | 'offers' | 'distribution' | 'complete';
 
 export default function SellPage() {
   const [step, setStep] = useState<Step>('upload');
@@ -23,6 +23,7 @@ export default function SellPage() {
     marketplace: boolean;
     buyerNetwork: boolean;
   }>({ marketplace: true, buyerNetwork: false });
+  const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
 
   async function handleImagesUploaded(urls: string[]) {
     setImageUrls(urls);
@@ -79,6 +80,13 @@ export default function SellPage() {
 
   async function handleConfirmed(details: any) {
     setConfirmedDetails(details);
+    
+    // If no delivery methods selected yet, show delivery selection
+    if (deliveryMethods.length === 0) {
+      setStep('delivery');
+      return;
+    }
+    
     setStep('analyzing');
 
     try {
@@ -89,8 +97,11 @@ export default function SellPage() {
         body: JSON.stringify({
           imageUrls,
           confirmedDetails: details,
+          analysis, // Pass full analysis
+          pricing, // Pass pricing data
           province: 'GAUTENG', // TODO: Get from user
           city: 'Johannesburg', // TODO: Get from user
+          deliveryMethods, // Pass selected delivery methods
           onMarketplace: false, // Don't list yet
           sentToBuyerNetwork: false,
         }),
@@ -179,6 +190,94 @@ export default function SellPage() {
               onConfirm={handleConfirmed}
               onEdit={() => setStep('questions')}
             />
+          )}
+
+          {step === 'delivery' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Choose Shipping Options</h2>
+              <p className="text-gray-600 mb-6">
+                Select how buyers can receive this item. You can choose multiple options.
+              </p>
+              
+              <div className="space-y-4">
+                <label className="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={deliveryMethods.includes('PAXI')}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setDeliveryMethods([...deliveryMethods, 'PAXI']);
+                      } else {
+                        setDeliveryMethods(deliveryMethods.filter(m => m !== 'PAXI'));
+                      }
+                    }}
+                    className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Paxi</div>
+                    <div className="text-sm text-gray-600">
+                      Locker-to-locker courier service. Buyers collect from Paxi lockers.
+                    </div>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={deliveryMethods.includes('LOCKER_TO_LOCKER')}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setDeliveryMethods([...deliveryMethods, 'LOCKER_TO_LOCKER']);
+                      } else {
+                        setDeliveryMethods(deliveryMethods.filter(m => m !== 'LOCKER_TO_LOCKER'));
+                      }
+                    }}
+                    className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Locker to Locker</div>
+                    <div className="text-sm text-gray-600">
+                      Alternative locker-to-locker service.
+                    </div>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={deliveryMethods.includes('DOOR_TO_DOOR')}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setDeliveryMethods([...deliveryMethods, 'DOOR_TO_DOOR']);
+                      } else {
+                        setDeliveryMethods(deliveryMethods.filter(m => m !== 'DOOR_TO_DOOR'));
+                      }
+                    }}
+                    className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Door to Door</div>
+                    <div className="text-sm text-gray-600">
+                      Direct courier delivery to buyer's address.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (deliveryMethods.length === 0) {
+                    alert('Please select at least one delivery method');
+                    return;
+                  }
+                  handleConfirmed(confirmedDetails);
+                }}
+                disabled={deliveryMethods.length === 0}
+                className="w-full mt-6 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold transition-colors"
+              >
+                Continue
+              </button>
+            </div>
           )}
 
           {step === 'offers' && (

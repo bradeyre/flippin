@@ -1,4 +1,5 @@
 import { anthropic, CLAUDE_MODEL } from './client';
+import { roundToFriendly } from '@/lib/utils/pricing';
 
 export interface PricingResult {
   recommended: number;
@@ -120,8 +121,11 @@ export function calculateInstantOffer(
   const multipliers = conditionRules || defaultMultipliers;
   const conditionMultiplier = multipliers[condition] || 1.0;
 
-  // Calculate seller receives
-  const sellerReceives = Math.round(marketPrice * baseOffer * conditionMultiplier / 50) * 50; // Round to nearest R50
+  // Calculate seller receives (before friendly rounding)
+  const rawSellerReceives = marketPrice * baseOffer * conditionMultiplier;
+  
+  // Round to friendly price (R87 → R99, R1,312 → R1,319)
+  const sellerReceives = roundToFriendly(rawSellerReceives);
 
   // Platform takes 5% from buyer
   const platformFee = Math.round(sellerReceives * 0.05);

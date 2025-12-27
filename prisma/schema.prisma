@@ -227,6 +227,7 @@ enum Condition {
 enum DeliveryMethod {
   PAXI
   DOOR_TO_DOOR
+  LOCKER_TO_LOCKER
 }
 
 // ============================================
