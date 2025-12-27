@@ -153,8 +153,28 @@ If you can't determine model/storage from photos:
     });
 
     console.log('Anthropic API response received');
-  } catch (apiError) {
-    console.error('Anthropic API error:', apiError);
+  } catch (apiError: any) {
+    console.error('Anthropic API error:', {
+      error: apiError,
+      message: apiError?.message,
+      status: apiError?.status,
+      statusCode: apiError?.statusCode,
+      type: apiError?.type,
+    });
+    
+    // Provide more helpful error messages
+    if (apiError?.status === 401 || apiError?.statusCode === 401) {
+      throw new Error('ANTHROPIC_API_KEY is invalid or missing. Please check your environment variables.');
+    }
+    
+    if (apiError?.status === 429 || apiError?.statusCode === 429) {
+      throw new Error('Rate limit exceeded. Please try again in a moment.');
+    }
+    
+    if (apiError?.message) {
+      throw new Error(`Anthropic API error: ${apiError.message}`);
+    }
+    
     throw apiError;
   }
 
