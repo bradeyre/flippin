@@ -95,15 +95,20 @@ If you can't determine model/storage from photos:
 }`;
 
   // Convert image URLs to appropriate format for Claude
-  const imageContent = imageUrls.map(url => {
+  const imageContent = imageUrls.map((url, index) => {
     // Check if it's a data URL (base64)
     if (url.startsWith('data:image/')) {
       const [header, base64Data] = url.split(',');
+      
+      if (!base64Data) {
+        throw new Error(`Image ${index + 1}: Invalid base64 data URL format`);
+      }
+      
       const mediaType = header.match(/data:(.*?);/)?.[1] || 'image/jpeg';
 
       console.log('Processing base64 image:', {
         mediaType,
-        dataLength: base64Data?.length,
+        dataLength: base64Data.length,
         headerSample: header.substring(0, 50),
       });
 
@@ -117,6 +122,10 @@ If you can't determine model/storage from photos:
       };
     } else {
       // It's a regular URL
+      if (!url || url.trim() === '') {
+        throw new Error(`Image ${index + 1}: Empty or invalid URL`);
+      }
+      
       console.log('Processing URL image:', url.substring(0, 100));
       return {
         type: 'image' as const,

@@ -53,12 +53,15 @@ export function roundToFriendlyPriceV2(price: number): number {
     return 99;
   }
 
-  // For prices R100+, round up to next number ending in 99
+  // For prices R100+, round up to next number ending in 9 or 99
+  // Pattern: Round up to next number ending in 9 (in the last digit)
   // Examples:
-  // R1,312 → R1,319 (round up to next 100, then -1)
-  // R5,450 → R5,499
-  // R12,800 → R12,899
-  const rounded = Math.ceil((price + 1) / 100) * 100 - 1;
+  // R1,312 → R1,319 (round up to next number ending in 9)
+  // R5,450 → R5,459
+  // R12,800 → R12,809
+  
+  // Round up to next 10, then subtract 1 to get ending in 9
+  const rounded = Math.ceil((price + 1) / 10) * 10 - 1;
   return rounded;
 }
 

@@ -37,7 +37,12 @@ export default function SellPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: 'Analysis failed', details: 'Server returned an error' };
+        }
 
         // Handle prohibited items
         if (errorData.error === 'prohibited') {
@@ -46,7 +51,14 @@ export default function SellPage() {
           return;
         }
 
-        throw new Error(errorData.error || 'Analysis failed');
+        // Show detailed error message
+        const errorMessage = errorData.details
+          ? `${errorData.error}\n\n${errorData.details}`
+          : errorData.error || 'Analysis failed';
+        
+        alert(`❌ ${errorMessage}`);
+        setStep('upload');
+        return;
       }
 
       const data = await response.json();
@@ -68,7 +80,11 @@ export default function SellPage() {
       }
     } catch (error) {
       console.error('Error analyzing images:', error);
-      alert('Failed to analyze images. Please try again.');
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to analyze images. Please try again.';
+      alert(`❌ ${errorMessage}\n\nPlease check your internet connection and try again.`);
       setStep('upload');
     }
   }

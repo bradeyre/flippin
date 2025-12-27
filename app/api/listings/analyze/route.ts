@@ -55,8 +55,36 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error analyzing listing:', error);
+    
+    // Provide more specific error messages
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check for common issues
+    if (errorMessage.includes('ANTHROPIC_API_KEY')) {
+      return NextResponse.json(
+        {
+          error: 'AI service configuration error',
+          details: 'Anthropic API key is missing or invalid. Please check your environment variables.',
+        },
+        { status: 500 }
+      );
+    }
+    
+    if (errorMessage.includes('Invalid JSON') || errorMessage.includes('No text response')) {
+      return NextResponse.json(
+        {
+          error: 'AI analysis error',
+          details: 'The AI service returned an unexpected response. Please try again with clearer images.',
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to analyze listing', details: (error as Error).message },
+      {
+        error: 'Failed to analyze listing',
+        details: errorMessage,
+      },
       { status: 500 }
     );
   }

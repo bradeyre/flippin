@@ -36,22 +36,38 @@ export function ImageUpload({ onComplete }: ImageUploadProps) {
       const uploadedUrls: string[] = [];
 
       for (const preview of previews) {
-        // Convert image to base64 data URL for vision analysis
-        // TODO: Replace with actual R2 upload once bucket is configured
-        const reader = new FileReader();
-        const dataUrlPromise = new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(preview.file);
+        // Upload to R2 storage
+        const formData = new FormData();
+        formData.append('file', preview.file);
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
         });
 
-        const dataUrl = await dataUrlPromise;
-        uploadedUrls.push(dataUrl);
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || errorData.details || 'Failed to upload image'
+          );
+        }
+
+        const { url } = await uploadResponse.json();
+        if (!url) {
+          throw new Error('No URL returned from upload');
+        }
+
+        uploadedUrls.push(url);
       }
 
       onComplete(uploadedUrls);
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('Failed to upload images. Please try again.');
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to upload images. Please try again.';
+      alert(`Upload failed: ${errorMessage}`);
       setUploading(false);
     }
   }

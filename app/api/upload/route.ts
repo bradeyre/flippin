@@ -68,6 +68,25 @@ export async function POST(request: NextRequest) {
 
     // More detailed error message
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check for missing environment variables
+    const missingVars: string[] = [];
+    if (!process.env.CLOUDFLARE_R2_ACCOUNT_ID) missingVars.push('CLOUDFLARE_R2_ACCOUNT_ID');
+    if (!process.env.CLOUDFLARE_R2_ACCESS_KEY) missingVars.push('CLOUDFLARE_R2_ACCESS_KEY');
+    if (!process.env.CLOUDFLARE_R2_SECRET_KEY) missingVars.push('CLOUDFLARE_R2_SECRET_KEY');
+    if (!process.env.CLOUDFLARE_R2_BUCKET_NAME) missingVars.push('CLOUDFLARE_R2_BUCKET_NAME');
+    if (!process.env.NEXT_PUBLIC_R2_PUBLIC_URL) missingVars.push('NEXT_PUBLIC_R2_PUBLIC_URL');
+    
+    if (missingVars.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Image storage not configured',
+          details: `Missing environment variables: ${missingVars.join(', ')}`,
+          hint: 'Please configure Cloudflare R2 credentials in your .env file'
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
