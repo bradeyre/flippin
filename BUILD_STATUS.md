@@ -47,7 +47,11 @@
 - ✅ Supabase auth integration
 - ✅ API route for image upload (`/api/upload`)
 - ✅ API route for AI analysis (`/api/listings/analyze`)
-- ⏳ API route for listing creation (`/api/listings/create`) - **MISSING - PRIORITY #1**
+- ✅ API route for listing creation (`/api/listings/create`)
+  - Creates listings in database
+  - Generates instant offers from active buyers
+  - Applies friendly pricing (R87 → R99, R1,312 → R1,319)
+  - Handles delivery method selection
 
 ### 5. Homepage
 - ✅ Hero section with clear value prop
@@ -58,24 +62,15 @@
 
 ## 🚧 IN PROGRESS
 
-### Critical Missing: Listing Creation API
-The `/api/listings/create` endpoint is referenced in the sell page but doesn't exist yet. This is **PRIORITY #1** as it blocks the entire seller flow.
-
-**What's needed:**
-1. Create listing in database
-2. Find active instant buyers in category
-3. Calculate and create instant offers
-4. Return listing + offers to frontend
-
-See `NEXT_STEPS.md` for detailed implementation plan.
-
 ### Seller Flow Status
 - ✅ UI complete (all steps)
 - ✅ Image upload working
 - ✅ AI analysis working
-- ⏳ Listing creation API - **MISSING**
-- ⏳ Listing finalization - **MISSING**
-- ⏳ Authentication - **MISSING**
+- ✅ Listing creation API - **COMPLETE**
+- ✅ Delivery method selection - **COMPLETE**
+- ✅ Friendly pricing - **COMPLETE**
+- ⏳ Listing finalization API - **NEXT PRIORITY**
+- ⏳ Authentication - **NEEDED**
 
 ## 📋 TODO (High Priority)
 
