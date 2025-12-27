@@ -45,8 +45,9 @@
 ### 4. Infrastructure
 - ✅ Cloudflare R2 image upload
 - ✅ Supabase auth integration
-- ✅ API route for image upload
-- ✅ API route for listing creation (complete flow)
+- ✅ API route for image upload (`/api/upload`)
+- ✅ API route for AI analysis (`/api/listings/analyze`)
+- ⏳ API route for listing creation (`/api/listings/create`) - **MISSING - PRIORITY #1**
 
 ### 5. Homepage
 - ✅ Hero section with clear value prop
@@ -57,12 +58,24 @@
 
 ## 🚧 IN PROGRESS
 
-Building the complete seller flow next:
-1. Sell page with image upload
-2. AI analysis with qualifying questions
-3. Seller confirmation of details
-4. Instant offer display
-5. Three options: Marketplace / Buyer Network / Both
+### Critical Missing: Listing Creation API
+The `/api/listings/create` endpoint is referenced in the sell page but doesn't exist yet. This is **PRIORITY #1** as it blocks the entire seller flow.
+
+**What's needed:**
+1. Create listing in database
+2. Find active instant buyers in category
+3. Calculate and create instant offers
+4. Return listing + offers to frontend
+
+See `NEXT_STEPS.md` for detailed implementation plan.
+
+### Seller Flow Status
+- ✅ UI complete (all steps)
+- ✅ Image upload working
+- ✅ AI analysis working
+- ⏳ Listing creation API - **MISSING**
+- ⏳ Listing finalization - **MISSING**
+- ⏳ Authentication - **MISSING**
 
 ## 📋 TODO (High Priority)
 
