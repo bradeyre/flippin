@@ -283,24 +283,47 @@ export default function MyTransactionsPage() {
                         {/* Fee Breakdown (for sellers) */}
                         {transaction.role === 'seller' && (
                           <div className="mt-3 pt-3 border-t border-gray-200">
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <p className="text-gray-500">Item Price</p>
-                                <p className="font-medium text-gray-900">
-                                  R{transaction.itemPrice.toLocaleString()}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-gray-500">Platform Fee</p>
-                                <p className="font-medium text-red-600">
-                                  -R{transaction.platformFee.toLocaleString()}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-gray-500">You Receive</p>
-                                <p className="font-medium text-green-600">
-                                  R{transaction.sellerReceives.toLocaleString()}
-                                </p>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Payout Breakdown</p>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-600">Item Price</span>
+                                  <span className="font-medium text-gray-900">
+                                    R{transaction.itemPrice.toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-600">Platform Fee (5.5%)</span>
+                                  <span className="font-medium text-red-600">
+                                    -R{transaction.platformFee.toLocaleString()}
+                                  </span>
+                                </div>
+                                {transaction.cardFee && transaction.cardFee > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-600">
+                                      Card Processing Fee (2%)
+                                      <span className="ml-2 text-xs text-gray-500">(paid by card)</span>
+                                    </span>
+                                    <span className="font-medium text-red-600">
+                                      -R{transaction.cardFee.toLocaleString()}
+                                    </span>
+                                  </div>
+                                )}
+                                {(!transaction.cardFee || transaction.cardFee === 0) && transaction.paymentMethod === 'EFT' && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-600">
+                                      Card Processing Fee
+                                      <span className="ml-2 text-xs text-green-600">(EFT - no fee)</span>
+                                    </span>
+                                    <span className="font-medium text-green-600">R0.00</span>
+                                  </div>
+                                )}
+                                <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
+                                  <span className="font-semibold text-gray-900">You Receive</span>
+                                  <span className="text-lg font-bold text-green-600">
+                                    R{transaction.sellerReceives.toLocaleString()}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>

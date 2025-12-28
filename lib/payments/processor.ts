@@ -29,6 +29,9 @@ export interface PaymentResult {
 
 /**
  * Calculate fees based on payment method
+ * 
+ * Strategy: Card fee is charged to seller (transparent breakdown)
+ * Buyer always sees one price, seller sees clear fee breakdown
  */
 export function calculatePaymentFees(
   itemPrice: number,
@@ -44,7 +47,7 @@ export function calculatePaymentFees(
     ? Math.round(itemPrice * 0.055)
     : 0;
 
-  // Card fee: 2% if paid by card (we absorb this)
+  // Card fee: 2% if paid by card (charged to seller, shown transparently)
   const cardFee = paymentMethod === 'CARD'
     ? Math.round(itemPrice * 0.02)
     : 0;

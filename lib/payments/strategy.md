@@ -54,35 +54,44 @@
 - Buyer pays: R1,010 (R1,000 + R10)
 - Seller receives: R935 (R1,000 - R55 - R10)
 
-## Recommendation: **Option 1 - Absorb the Fee**
+## Recommendation: **Charge Seller, Show Transparently**
 
 **Reasoning:**
-1. **User Experience**: One price = faster decisions = more sales
-2. **Competitive**: Most modern platforms absorb card fees
-3. **Scale**: At scale, we can negotiate better rates
-4. **Psychology**: Buyers prefer simple pricing
+1. **Transparency**: Both buyer and seller see clear fee breakdown
+2. **Buyer Experience**: One price = faster decisions = more sales
+3. **Seller Understanding**: Seller sees exactly what they're paying for
+4. **Fairness**: Seller benefits from card convenience, pays the fee
+5. **Accounting**: Clear separation of platform fee vs payment processing fee
 
 **How to handle:**
-- Factor 2% into our platform fee calculation
-- For listings over R1,000: Platform fee = 5.5% + 2% card fee = 7.5% total
-- For listings under R1,000: We absorb the 2% (since no platform fee)
-- Or: Deduct from seller payout (simpler accounting)
+- Buyer pays: One price (no card fee shown to buyer)
+- Seller receives: Item price - platform fee - card fee (if card payment)
+- Show clear breakdown in seller dashboard:
+  - Item Price: R1,500
+  - Platform Fee (5.5%): -R82.50
+  - Card Processing Fee (2%): -R30.00 (only if paid by card)
+  - You Receive: R1,387.50
 
 **Example Calculation:**
 ```
 Item Price: R1,500
 Shipping: R150
-Total: R1,650
+Total Buyer Pays: R1,650 (same regardless of payment method)
 
-If paid by card:
-- Card fee (2%): R33
+If paid by CARD:
 - Platform fee (5.5%): R82.50
-- Seller receives: R1,500 - R82.50 - R33 = R1,384.50
+- Card fee (2%): R30.00
+- Seller receives: R1,500 - R82.50 - R30.00 = R1,387.50
 
 If paid by EFT:
 - Platform fee (5.5%): R82.50
+- Card fee: R0.00
 - Seller receives: R1,500 - R82.50 = R1,417.50
 ```
 
-**Note**: We could also offer a small discount for EFT payments to encourage them (since they're cheaper for us).
+**Benefits:**
+- ✅ Buyer sees one simple price (no friction)
+- ✅ Seller sees transparent fee breakdown
+- ✅ Encourages EFT payments (seller gets more)
+- ✅ Clear accounting and reporting
 
