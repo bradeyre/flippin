@@ -14,61 +14,61 @@ datasource db {
 // ============================================
 
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  phone             String?  @unique
+  id    String  @id @default(cuid())
+  email String  @unique
+  phone String? @unique
 
   // Profile
-  firstName         String?
-  lastName          String?
-  avatar            String?
+  firstName String?
+  lastName  String?
+  avatar    String?
 
   // Type
-  type              UserType @default(PERSONAL_SELLER)
+  type UserType @default(PERSONAL_SELLER)
 
   // Verification
-  verified          Boolean  @default(false)
+  verified          Boolean           @default(false)
   verificationLevel VerificationLevel @default(BASIC)
   idDocumentUrl     String?
 
   // Business (if applicable)
-  companyName       String?
-  cipcNumber        String?
+  companyName String?
+  cipcNumber  String?
 
   // Location
-  province          Province?
-  city              String?
+  province Province?
+  city     String?
 
   // Banking details
-  bankName          String?
-  accountHolder     String?
-  accountNumber     String?
-  branchCode        String?
-  accountType       String?
-  bankingVerified   Boolean  @default(false)
+  bankName        String?
+  accountHolder   String?
+  accountNumber   String?
+  branchCode      String?
+  accountType     String?
+  bankingVerified Boolean @default(false)
 
   // Stats
-  rating            Decimal? @default(0) @db.Decimal(3,2)
-  totalSales        Int      @default(0)
-  totalPurchases    Int      @default(0)
+  rating         Decimal? @default(0) @db.Decimal(3, 2)
+  totalSales     Int      @default(0)
+  totalPurchases Int      @default(0)
 
   // Preferences
   notificationPrefs Json?
 
   // Relationships
-  listings          Listing[]
-  buyOrders         BuyOrder[]
-  offers            Offer[]
-  sentMessages      Message[] @relation("SentMessages")
-  receivedMessages  Message[] @relation("ReceivedMessages")
-  sellerTransactions Transaction[] @relation("SellerTransactions")
-  buyerTransactions  Transaction[] @relation("BuyerTransactions")
-  reviews           Review[]
-  notifications     Notification[]
-  instantBuyer      InstantBuyer?
+  listings           Listing[]
+  buyOrders          BuyOrder[]
+  offers             Offer[]
+  sentMessages       Message[]      @relation("SentMessages")
+  receivedMessages   Message[]      @relation("ReceivedMessages")
+  sellerTransactions Transaction[]  @relation("SellerTransactions")
+  buyerTransactions  Transaction[]  @relation("BuyerTransactions")
+  reviews            Review[]
+  notifications      Notification[]
+  instantBuyer       InstantBuyer?
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([email])
   @@index([phone])
@@ -107,26 +107,26 @@ enum Province {
 // ============================================
 
 model Category {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  slug        String     @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
   icon        String?
 
   // Hierarchy
-  parentId    String?
-  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children    Category[] @relation("CategoryTree")
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryTree")
 
   // AI metadata
-  typicalPriceRange Json?
-  keyAttributes     String[]
+  typicalPriceRange   Json?
+  keyAttributes       String[]
   qualifyingQuestions Json? // Category-specific questions to ask sellers
 
-  listings    Listing[]
-  buyOrders   BuyOrder[]
+  listings  Listing[]
+  buyOrders BuyOrder[]
 
-  createdAt   DateTime   @default(now())
+  createdAt DateTime @default(now())
 
   @@index([slug])
   @@index([parentId])
@@ -137,68 +137,68 @@ model Category {
 // ============================================
 
 model Listing {
-  id                String      @id @default(cuid())
+  id String @id @default(cuid())
 
   // Seller
-  sellerId          String
-  seller            User        @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId String
+  seller   User   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
   // Status
-  status            ListingStatus @default(DRAFT)
+  status ListingStatus @default(DRAFT)
 
   // Item
-  title             String
-  description       String      @db.Text
-  categoryId        String
-  category          Category    @relation(fields: [categoryId], references: [id])
-  condition         Condition
+  title       String
+  description String    @db.Text
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  condition   Condition
 
   // Product details (seller confirmed)
-  brand             String?
-  model             String?
-  variant           String?
-  detailedSpecs     Json?       // Battery health, IMEI, etc.
-  sellerConfirmed   Boolean     @default(false)
+  brand           String?
+  model           String?
+  variant         String?
+  detailedSpecs   Json? // Battery health, IMEI, etc.
+  sellerConfirmed Boolean @default(false)
 
   // Pricing
-  askingPrice       Decimal     @db.Decimal(10,2)
-  shippingCost      Decimal?    @db.Decimal(10,2)
+  askingPrice  Decimal  @db.Decimal(10, 2)
+  shippingCost Decimal? @db.Decimal(10, 2)
 
   // AI data
-  aiAnalysis        Json?
-  aiSuggestedPrice  Decimal?    @db.Decimal(10,2)
-  aiConfidence      String?
-  qualityScore      Int?
+  aiAnalysis       Json?
+  aiSuggestedPrice Decimal? @db.Decimal(10, 2)
+  aiConfidence     String?
+  qualityScore     Int?
 
   // Media
-  images            String[]
+  images String[]
 
   // Location
-  province          Province
-  city              String
+  province Province
+  city     String
 
   // Delivery
-  deliveryMethods   DeliveryMethod[]
+  deliveryMethods DeliveryMethod[]
 
   // Distribution options
-  onMarketplace     Boolean     @default(true)
-  sentToBuyerNetwork Boolean    @default(false)
+  onMarketplace      Boolean @default(true)
+  sentToBuyerNetwork Boolean @default(false)
 
   // Engagement
-  views             Int         @default(0)
-  saves             Int         @default(0)
+  views Int @default(0)
+  saves Int @default(0)
 
   // Relationships
-  offers            Offer[]
-  instantOffers     InstantOffer[]
-  messages          Message[]
-  transactions      Transaction[]
-  matchedBuyOrders  BuyOrder[]
+  offers           Offer[]
+  instantOffers    InstantOffer[]
+  messages         Message[]
+  transactions     Transaction[]
+  matchedBuyOrders BuyOrder[]
 
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  expiresAt         DateTime?
-  soldAt            DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime?
+  soldAt    DateTime?
 
   @@index([sellerId, status])
   @@index([categoryId, status])
@@ -235,43 +235,43 @@ enum DeliveryMethod {
 // ============================================
 
 model BuyOrder {
-  id                String         @id @default(cuid())
+  id String @id @default(cuid())
 
   // Buyer
-  buyerId           String
-  buyer             User           @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId String
+  buyer   User   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
 
   // Status
-  status            BuyOrderStatus @default(ACTIVE)
+  status BuyOrderStatus @default(ACTIVE)
 
   // What they want
-  title             String
-  description       String         @db.Text
-  categoryId        String
-  category          Category       @relation(fields: [categoryId], references: [id])
+  title       String
+  description String   @db.Text
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
 
   // Acceptable conditions
-  conditions        Condition[]
+  conditions Condition[]
 
   // Pricing
-  offerPrice        Decimal        @db.Decimal(10,2)
+  offerPrice Decimal @db.Decimal(10, 2)
 
   // Payment
-  cardAuthorized    Boolean        @default(false)
-  authReference     String?
+  cardAuthorized Boolean @default(false)
+  authReference  String?
 
   // Location
-  provinces         Province[]
+  provinces Province[]
 
   // Matched listing
-  matchedListings   Listing[]
+  matchedListings Listing[]
 
-  views             Int            @default(0)
+  views Int @default(0)
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  expiresAt         DateTime
-  fulfilledAt       DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime
+  fulfilledAt DateTime?
 
   @@index([buyerId, status])
   @@index([categoryId, status])
@@ -290,33 +290,33 @@ enum BuyOrderStatus {
 // ============================================
 
 model InstantBuyer {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id])
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  companyName     String
-  approved        Boolean @default(false)
+  companyName String
+  approved    Boolean @default(false)
 
   // Categories they buy
-  categories      String[] // category IDs
+  categories String[] // category IDs
 
   // Pricing rules
-  baseOffer       Decimal  @db.Decimal(5,2) // e.g., 0.60 = 60%
-  conditionRules  Json     // { NEW: 1.10, LIKE_NEW: 1.05, GOOD: 1.0, FAIR: 0.85, POOR: 0.70 }
+  baseOffer      Decimal @db.Decimal(5, 2) // e.g., 0.60 = 60%
+  conditionRules Json // { NEW: 1.10, LIKE_NEW: 1.05, GOOD: 1.0, FAIR: 0.85, POOR: 0.70 }
 
   // Status
-  active          Boolean  @default(true)
-  pausedAt        DateTime?
-  pausedReason    String?
+  active       Boolean   @default(true)
+  pausedAt     DateTime?
+  pausedReason String?
 
   // Stats
-  totalPurchases  Int      @default(0)
-  totalSpent      Decimal  @default(0) @db.Decimal(12,2)
+  totalPurchases Int     @default(0)
+  totalSpent     Decimal @default(0) @db.Decimal(12, 2)
 
-  offers          InstantOffer[]
+  offers InstantOffer[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([active, approved])
 }
@@ -326,23 +326,23 @@ model InstantBuyer {
 // ============================================
 
 model InstantOffer {
-  id              String       @id @default(cuid())
+  id String @id @default(cuid())
 
-  listingId       String
-  listing         Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  buyerId         String
-  buyer           InstantBuyer @relation(fields: [buyerId], references: [id])
+  buyerId String
+  buyer   InstantBuyer @relation(fields: [buyerId], references: [id])
 
-  sellerReceives  Decimal      @db.Decimal(10,2) // What seller gets
-  buyerPays       Decimal      @db.Decimal(10,2) // Includes 5% platform fee
-  platformFee     Decimal      @db.Decimal(10,2) // 5% commission
+  sellerReceives Decimal @db.Decimal(10, 2) // What seller gets
+  buyerPays      Decimal @db.Decimal(10, 2) // Includes 5% platform fee
+  platformFee    Decimal @db.Decimal(10, 2) // 5% commission
 
-  status          OfferStatus  @default(PENDING)
+  status OfferStatus @default(PENDING)
 
-  createdAt       DateTime     @default(now())
-  expiresAt       DateTime
-  acceptedAt      DateTime?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  acceptedAt DateTime?
 
   @@index([listingId, status])
   @@index([buyerId, status])
@@ -353,21 +353,21 @@ model InstantOffer {
 // ============================================
 
 model Offer {
-  id          String      @id @default(cuid())
+  id String @id @default(cuid())
 
-  listingId   String
-  listing     Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  buyerId     String
-  buyer       User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId String
+  buyer   User   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
 
-  amount      Decimal     @db.Decimal(10,2)
-  message     String?     @db.Text
+  amount  Decimal @db.Decimal(10, 2)
+  message String? @db.Text
 
-  status      OfferStatus @default(PENDING)
+  status OfferStatus @default(PENDING)
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   expiresAt   DateTime
   respondedAt DateTime?
 
@@ -388,53 +388,55 @@ enum OfferStatus {
 // ============================================
 
 model Transaction {
-  id              String           @id @default(cuid())
+  id String @id @default(cuid())
 
-  sellerId        String
-  seller          User             @relation("SellerTransactions", fields: [sellerId], references: [id])
+  sellerId String
+  seller   User   @relation("SellerTransactions", fields: [sellerId], references: [id])
 
-  buyerId         String
-  buyer           User             @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  buyerId String
+  buyer   User   @relation("BuyerTransactions", fields: [buyerId], references: [id])
 
-  listingId       String
-  listing         Listing          @relation(fields: [listingId], references: [id])
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
 
   // Amounts
-  itemPrice       Decimal          @db.Decimal(10,2)
-  shippingCost    Decimal          @db.Decimal(10,2) @default(0)
-  totalAmount     Decimal          @db.Decimal(10,2) // What buyer pays
-  platformFee     Decimal          @db.Decimal(10,2)
-  sellerReceives  Decimal          @db.Decimal(10,2)
+  itemPrice      Decimal @db.Decimal(10, 2)
+  shippingCost   Decimal @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal @db.Decimal(10, 2) // What buyer pays
+  platformFee    Decimal @db.Decimal(10, 2)
+  cardFee        Decimal @default(0) @db.Decimal(10, 2) // 2% card processing fee (absorbed)
+  sellerReceives Decimal @db.Decimal(10, 2)
 
   // Type
   transactionType TransactionType
 
   // Payment
-  paymentMethod   PaymentMethod?
-  paymentStatus   PaymentStatus    @default(PENDING)
-  paymentProof    String?          // URL to uploaded proof of payment
-  paymentRef      String?          // Bank reference
+  paymentMethod    PaymentMethod?
+  paymentStatus    PaymentStatus  @default(PENDING)
+  paymentProof     String? // URL to uploaded proof of payment
+  paymentRef       String? // Bank reference (deprecated, use paymentReference)
+  paymentReference String? // Payment reference (EFT reference or card transaction ID)
 
   // Delivery
-  deliveryMethod  DeliveryMethod?
-  trackingNumber  String?
-  courierName     String?
-  deliveryStatus  DeliveryStatus   @default(PENDING)
+  deliveryMethod DeliveryMethod?
+  trackingNumber String?
+  courierName    String?
+  deliveryStatus DeliveryStatus  @default(PENDING)
 
   // Status
-  status          TransactionStatus @default(CREATED)
+  status TransactionStatus @default(CREATED)
 
   // Dispute & Review
-  disputeReason   String?
-  disputedAt      DateTime?
-  review          Review?
+  disputeReason String?
+  disputedAt    DateTime?
+  review        Review?
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  paidAt          DateTime?
-  shippedAt       DateTime?
-  deliveredAt     DateTime?
-  completedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  paidAt      DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  completedAt DateTime?
 
   @@index([sellerId])
   @@index([buyerId])
@@ -489,25 +491,25 @@ enum TransactionStatus {
 // ============================================
 
 model Review {
-  id                String      @id @default(cuid())
+  id String @id @default(cuid())
 
-  transactionId     String      @unique
-  transaction       Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String      @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
 
-  reviewerId        String
-  reviewer          User        @relation(fields: [reviewerId], references: [id])
+  reviewerId String
+  reviewer   User   @relation(fields: [reviewerId], references: [id])
 
-  revieweeId        String      // The user being reviewed
+  revieweeId String // The user being reviewed
 
-  rating            Int         // 1-5
-  comment           String?     @db.Text
+  rating  Int // 1-5
+  comment String? @db.Text
 
   // Detailed ratings
   communicationRating Int?
-  accuracyRating     Int?
-  shippingRating     Int?
+  accuracyRating      Int?
+  shippingRating      Int?
 
-  createdAt         DateTime    @default(now())
+  createdAt DateTime @default(now())
 
   @@index([reviewerId])
   @@index([revieweeId])
@@ -518,24 +520,24 @@ model Review {
 // ============================================
 
 model Message {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
-  receiverId  String
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
-  listingId   String?
-  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
 
   content     String   @db.Text
   attachments String[]
 
-  read        Boolean  @default(false)
-  readAt      DateTime?
+  read   Boolean   @default(false)
+  readAt DateTime?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([senderId, receiverId])
   @@index([listingId])
@@ -547,10 +549,10 @@ model Message {
 // ============================================
 
 model Notification {
-  id        String           @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   type      NotificationType
   title     String
@@ -558,12 +560,12 @@ model Notification {
   data      Json?
   actionUrl String?
 
-  channels  String[]         // email, sms, push
+  channels String[] // email, sms, push
 
-  read      Boolean          @default(false)
-  readAt    DateTime?
+  read   Boolean   @default(false)
+  readAt DateTime?
 
-  createdAt DateTime         @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId, read])
   @@index([createdAt])
@@ -591,25 +593,25 @@ enum NotificationType {
 // ============================================
 
 model PlatformSettings {
-  id    String @id @default("settings")
+  id String @id @default("settings")
 
   // Commission rates
-  marketplaceRate      Decimal @db.Decimal(5,2) @default(0.055) // 5.5%
-  freeThreshold        Decimal @db.Decimal(10,2) @default(1000) // R1000
-  instantOfferRate     Decimal @db.Decimal(5,2) @default(0.05)  // 5%
+  marketplaceRate  Decimal @default(0.055) @db.Decimal(5, 2) // 5.5%
+  freeThreshold    Decimal @default(1000) @db.Decimal(10, 2) // R1000
+  instantOfferRate Decimal @default(0.05) @db.Decimal(5, 2) // 5%
 
   // Escrow
-  escrowReleaseDays    Int     @default(2) // days after delivery
+  escrowReleaseDays Int @default(2) // days after delivery
 
   // Messaging templates
-  emailTemplates       Json?
-  smsTemplates         Json?
+  emailTemplates Json?
+  smsTemplates   Json?
 
   // Platform bank details
-  platformBankName     String?
-  platformAccountName  String?
+  platformBankName      String?
+  platformAccountName   String?
   platformAccountNumber String?
-  platformBranchCode   String?
+  platformBranchCode    String?
 
   updatedAt DateTime @updatedAt
 }
@@ -619,35 +621,35 @@ model PlatformSettings {
 // ============================================
 
 model LedgerEntry {
-  id              String      @id @default(cuid())
+  id String @id @default(cuid())
 
-  transactionId   String?
+  transactionId String?
 
-  type            LedgerEntryType
-  description     String
+  type        LedgerEntryType
+  description String
 
   // Amounts
-  amount          Decimal     @db.Decimal(10,2)
+  amount Decimal @db.Decimal(10, 2)
 
   // Parties
-  fromUserId      String?
-  toUserId        String?
+  fromUserId String?
+  toUserId   String?
 
   // Platform revenue
-  platformRevenue Decimal?    @db.Decimal(10,2)
+  platformRevenue Decimal? @db.Decimal(10, 2)
 
   // Status
-  status          LedgerStatus @default(PENDING)
+  status LedgerStatus @default(PENDING)
 
   // Payment details
-  paymentMethod   String?
-  paymentRef      String?
+  paymentMethod String?
+  paymentRef    String?
 
   // Metadata
-  metadata        Json?
+  metadata Json?
 
-  createdAt       DateTime    @default(now())
-  completedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
 
   @@index([transactionId])
   @@index([fromUserId])

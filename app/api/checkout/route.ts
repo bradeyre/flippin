@@ -166,7 +166,8 @@ export async function POST(req: NextRequest) {
         cardFee: paymentMethod === 'CARD' ? cardFee : 0,
         sellerReceives,
         paymentMethod: paymentMethod as 'EFT' | 'CARD',
-        paymentReference: paymentResult.reference || paymentResult.transactionId,
+        paymentReference: paymentResult.reference || paymentResult.transactionId || null,
+        paymentRef: paymentResult.reference || paymentResult.transactionId || null, // Keep for backward compatibility
         status: paymentMethod === 'CARD' ? 'PAID' : 'PAYMENT_PENDING',
         paymentStatus: paymentMethod === 'CARD' ? 'PAID' : 'PENDING',
         deliveryStatus: 'NOT_SHIPPED',
@@ -254,9 +255,10 @@ export async function POST(req: NextRequest) {
                   </ol>
                   <p><strong>Bank Details:</strong></p>
                   <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    ${platformSettings?.bankName ? `<p style="margin: 5px 0;"><strong>Bank:</strong> ${platformSettings.bankName}</p>` : ''}
-                    ${platformSettings?.accountNumber ? `<p style="margin: 5px 0;"><strong>Account Number:</strong> ${platformSettings.accountNumber}</p>` : ''}
-                    ${platformSettings?.branchCode ? `<p style="margin: 5px 0;"><strong>Branch Code:</strong> ${platformSettings.branchCode}</p>` : ''}
+                    ${platformSettings?.platformBankName ? `<p style="margin: 5px 0;"><strong>Bank:</strong> ${platformSettings.platformBankName}</p>` : ''}
+                    ${platformSettings?.platformAccountName ? `<p style="margin: 5px 0;"><strong>Account Name:</strong> ${platformSettings.platformAccountName}</p>` : ''}
+                    ${platformSettings?.platformAccountNumber ? `<p style="margin: 5px 0;"><strong>Account Number:</strong> ${platformSettings.platformAccountNumber}</p>` : ''}
+                    ${platformSettings?.platformBranchCode ? `<p style="margin: 5px 0;"><strong>Branch Code:</strong> ${platformSettings.platformBranchCode}</p>` : ''}
                     <p style="margin: 5px 0;"><strong>Reference:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${paymentResult.reference}</code></p>
                   </div>
                   <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/transactions/${transaction.id}" style="display: inline-block; background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px;">View Transaction</a>
@@ -284,9 +286,10 @@ export async function POST(req: NextRequest) {
             amount: totalAmount,
             reference: paymentResult.reference,
             bankDetails: platformSettings ? {
-              bankName: platformSettings.bankName,
-              accountNumber: platformSettings.accountNumber,
-              branchCode: platformSettings.branchCode,
+              bankName: platformSettings.platformBankName,
+              accountName: platformSettings.platformAccountName,
+              accountNumber: platformSettings.platformAccountNumber,
+              branchCode: platformSettings.platformBranchCode,
             } : null,
           },
     });
