@@ -320,9 +320,27 @@ export default function ListingDetailPage() {
                 >
                   Buy Now
                 </button>
-                <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                <button
+                  onClick={() => {
+                    // Add to cart
+                    if (typeof window !== 'undefined') {
+                      const { addToCart } = require('@/lib/cart/store');
+                      addToCart({
+                        listingId: listing.id,
+                        listingTitle: listing.title,
+                        listingImage: listing.images[0] || '',
+                        askingPrice: listing.askingPrice,
+                        shippingCost: listing.shippingCost || 0,
+                        sellerId: listing.seller.id,
+                        sellerName: `${listing.seller.firstName} ${listing.seller.lastName}`,
+                      });
+                      alert('Added to cart! 🛒');
+                    }
+                  }}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
                   <Heart className="w-4 h-4" />
-                  Save for Later
+                  Add to Cart
                 </button>
               </div>
 
