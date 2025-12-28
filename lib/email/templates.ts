@@ -11,52 +11,6 @@ export interface EmailTemplate {
 
 export const emailTemplates = {
   // Seller emails
-  listingCreated: (listingTitle: string, listingId: string): EmailTemplate => ({
-    subject: `🎉 Your listing "${listingTitle}" is live!`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px; }
-          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🎉 You're Live!</h1>
-            <p>Your listing is now on Flippin</p>
-          </div>
-          <div class="content">
-            <p>Hey there, savvy seller! 👋</p>
-            <p>Great news: <strong>${listingTitle}</strong> is now live on Flippin and ready to find its new home.</p>
-            <p>Here's what happens next:</p>
-            <ul>
-              <li>📱 Buyers can now see your listing and make offers</li>
-              <li>⚡ Instant buyers might make you an offer right away</li>
-              <li>💬 You'll get notified when someone shows interest</li>
-            </ul>
-            <p>Pro tip: The better your photos and description, the faster it sells. You've got this! 🚀</p>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/listings/${listingId}" class="button">View Your Listing</a>
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-              Questions? Just reply to this email - we're here to help!
-            </p>
-          </div>
-          <div class="footer">
-            <p>Happy selling!<br>The Flippin Team 🎯</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-    text: `🎉 You're Live!\n\nYour listing "${listingTitle}" is now live on Flippin!\n\nView it here: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/listings/${listingId}\n\nHappy selling!\nThe Flippin Team`,
-  }),
-
   offerReceived: (offerAmount: number, listingTitle: string, buyerName: string, offerId: string): EmailTemplate => ({
     subject: `💰 New offer: R${offerAmount.toLocaleString()} on "${listingTitle}"`,
     html: `
