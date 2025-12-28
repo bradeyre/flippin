@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Lock, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -36,6 +36,7 @@ interface BankDetails {
 export default function CheckoutPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);

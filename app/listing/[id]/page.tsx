@@ -38,6 +38,7 @@ interface Listing {
 
 export default function ListingDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -292,7 +293,31 @@ export default function ListingDetailPage() {
                 >
                   Make Offer
                 </button>
-                <button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-semibold transition-colors">
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          listingId: listing.id,
+                          paymentMethod: 'EFT', // Default to EFT, can change in checkout
+                        }),
+                      });
+
+                      if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to create checkout');
+                      }
+
+                      const data = await response.json();
+                      router.push(`/checkout/${data.transaction.id}`);
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : 'Failed to proceed to checkout');
+                    }
+                  }}
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-semibold transition-colors"
+                >
                   Buy Now
                 </button>
                 <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">

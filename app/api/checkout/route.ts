@@ -100,25 +100,35 @@ export async function POST(req: NextRequest) {
       sellerId = listing.sellerId;
     }
 
-    // Check if transaction already exists
+    // Check if transaction already exists (only for active transactions)
     const existingTransaction = await db.transaction.findFirst({
       where: {
         listingId: listing.id,
         buyerId: user.id,
         status: {
-          in: ['PAYMENT_PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'INSPECTION_PERIOD'],
+          in: ['PAYMENT_PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'INSPECTION_PERIOD', 'CREATED'],
         },
       },
     });
 
     if (existingTransaction) {
-      return NextResponse.json(
-        {
-          error: 'Transaction already exists',
-          transaction: existingTransaction,
-        },
-        { status: 400 }
-      );
+      // Return existing transaction instead of error
+      return NextResponse.json({
+        transaction: existingTransaction,
+        paymentMethod: existingTransaction.paymentMethod,
+        paymentResult: existingTransaction.paymentMethod === 'CARD'
+          ? { success: true, transactionId: existingTransaction.paymentReference }
+          : {
+              amount: existingTransaction.totalAmount.toNumber(),
+              reference: existingTransaction.paymentReference,
+              bankDetails: platformSettings ? {
+                bankName: platformSettings.platformBankName,
+                accountName: platformSettings.platformAccountName,
+                accountNumber: platformSettings.platformAccountNumber,
+                branchCode: platformSettings.platformBranchCode,
+              } : null,
+            },
+      });
     }
 
     // Calculate fees based on payment method
