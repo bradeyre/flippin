@@ -20,13 +20,22 @@
   - Ledger (audit trail)
   - Platform Settings (editable from admin)
 
-### 3. AI Functions (Core Innovation)
+### 3. AI Functions (Core Innovation) - **ENHANCED**
 - ✅ Vision Analysis (`lib/ai/vision.ts`)
   - Detects brand, model, variant
   - Assesses condition
   - Identifies issues
   - Checks authenticity
   - Asks for more info if needed
+  - **NEW: Photo Quality Analysis**
+    - Overall quality score (0-100)
+    - Detects issues (lighting, focus, background, angle)
+    - Provides actionable improvement suggestions
+  - **NEW: Photo Completeness Analysis**
+    - Checks for all essential angles (front, back, sides, top, bottom, screen)
+    - Category-specific recommendations (phones need all sides, etc.)
+    - Lists missing angles
+    - Suggests specific additional photos needed
 
 - ✅ Pricing Engine (`lib/ai/pricing.ts`)
   - Uses web search for live SA market data
@@ -34,8 +43,12 @@
   - Calculates instant offer amounts
   - 5% platform fee for instant buyers
 
-- ✅ Listing Copy Generator (`lib/ai/listing-generator.ts`)
-  - Witty, professional descriptions
+- ✅ Listing Copy Generator (`lib/ai/listing-generator.ts`) - **ENHANCED**
+  - **NEW: Comprehensive 8-12 sentence descriptions** (up from 3-5)
+  - Includes: condition details, features, what's included/not included
+  - Usage notes and selling reason
+  - More buyer-friendly and SEO-optimized
+  - Witty, professional tone
   - SEO-optimized titles
 
 - ✅ Buy Order Matching (`lib/ai/matching.ts`)
