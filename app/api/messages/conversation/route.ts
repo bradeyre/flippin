@@ -85,6 +85,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       messages,
       otherUser,
+      currentUserId: user.id, // Include current user ID for frontend
     });
   } catch (error) {
     console.error('Error fetching conversation:', error);

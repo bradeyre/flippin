@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Send, User, Package } from 'lucide-react';
+import { ArrowLeft, Send, User, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 interface Message {
@@ -34,6 +34,7 @@ export default function ChatPage() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [otherUser, setOtherUser] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -58,20 +59,23 @@ export default function ChatPage() {
   async function fetchMessages() {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      params.append('otherUserId', params.userId as string);
-      if (listingId) params.append('listingId', listingId);
+      const queryParams = new URLSearchParams();
+      queryParams.append('otherUserId', params.userId as string);
+      if (listingId) queryParams.append('listingId', listingId);
 
-      const response = await fetch(`/api/messages?${params}`);
+      const response = await fetch(`/api/messages/conversation?${queryParams}`);
       if (!response.ok) throw new Error('Failed to fetch messages');
       
       const data = await response.json();
-      // Get messages for this conversation
-      const conversationMessages = data.conversations?.find(
-        (c: any) => c.otherUser.id === params.userId
-      )?.messages || [];
+      setMessages(data.messages || []);
       
-      setMessages(conversationMessages);
+      if (data.otherUser) {
+        setOtherUser(data.otherUser);
+      }
+      
+      if (data.currentUserId) {
+        setCurrentUserId(data.currentUserId);
+      }
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
@@ -80,7 +84,7 @@ export default function ChatPage() {
   }
 
   async function fetchOtherUser() {
-    // Will be set from fetchMessages
+    // Set from fetchMessages
   }
 
   async function fetchListing() {
