@@ -71,8 +71,7 @@ export default function ListingDetailPage() {
   }
 
   async function handleMakeOffer() {
-    // TODO: Implement make offer API
-    alert('Make offer functionality coming soon');
+    router.push(`/listing/${params.id}/offer`);
   }
 
   if (loading) {

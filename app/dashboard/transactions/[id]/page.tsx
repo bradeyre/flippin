@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Package, Truck, CheckCircle, Clock, AlertCircle, Copy, CreditCard, Building2 } from 'lucide-react';
+import { ArrowLeft, Package, Truck, CheckCircle, Clock, AlertCircle, Copy, CreditCard, Building2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Transaction {
@@ -450,6 +450,106 @@ export default function TransactionDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Shipping Form Component
+function ShippingForm({ transactionId, onSuccess }: { transactionId: string; onSuccess: () => void }) {
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [courierName, setCourierName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/transactions/${transactionId}/ship`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackingNumber: trackingNumber.trim(),
+          courierName: courierName.trim() || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update shipping');
+      }
+
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update shipping');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-2">
+          Tracking Number <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="trackingNumber"
+          type="text"
+          value={trackingNumber}
+          onChange={(e) => setTrackingNumber(e.target.value)}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          placeholder="Enter tracking number"
+        />
+      </div>
+      <div>
+        <label htmlFor="courierName" className="block text-sm font-medium text-gray-700 mb-2">
+          Courier Name <span className="text-gray-400">(Optional)</span>
+        </label>
+        <select
+          id="courierName"
+          value={courierName}
+          onChange={(e) => setCourierName(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+        >
+          <option value="">Select courier...</option>
+          <option value="Paxi">Paxi</option>
+          <option value="PostNet">PostNet</option>
+          <option value="FastWay">FastWay</option>
+          <option value="CourierGuy">CourierGuy</option>
+          <option value="DHL">DHL</option>
+          <option value="FedEx">FedEx</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-sm text-red-800">{error}</p>
+        </div>
+      )}
+      <button
+        type="submit"
+        disabled={!trackingNumber.trim() || submitting}
+        className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Updating...
+          </>
+        ) : (
+          <>
+            <Truck className="w-5 h-5" />
+            Mark as Shipped
+          </>
+        )}
+      </button>
+      <p className="text-xs text-gray-500">
+        The buyer will be notified once you add tracking information.
+      </p>
+    </form>
   );
 }
 
