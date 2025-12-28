@@ -453,7 +453,8 @@ enum TransactionType {
 
 enum PaymentMethod {
   CARD
-  BANK_TRANSFER
+  EFT
+  BANK_TRANSFER // Deprecated, use EFT
 }
 
 enum PaymentStatus {

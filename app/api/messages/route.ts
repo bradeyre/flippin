@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     let where: any = {
       OR: [
         { senderId: user.id },
-        { recipientId: user.id },
+        { receiverId: user.id },
       ],
     };
 
@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
       where.AND = [
         {
           OR: [
-            { senderId: user.id, recipientId: otherUserId },
-            { senderId: otherUserId, recipientId: user.id },
+            { senderId: user.id, receiverId: otherUserId },
+            { senderId: otherUserId, receiverId: user.id },
           ],
         },
       ];
@@ -78,8 +78,8 @@ export async function GET(req: NextRequest) {
     const conversations = new Map<string, any>();
 
     messages.forEach((message) => {
-      const otherUserId = message.senderId === user.id ? message.recipientId : message.senderId;
-      const otherUser = message.senderId === user.id ? message.recipient : message.sender;
+      const otherUserId = message.senderId === user.id ? message.receiverId : message.senderId;
+      const otherUser = message.senderId === user.id ? message.receiver : message.sender;
 
       if (!conversations.has(otherUserId)) {
         conversations.set(otherUserId, {
@@ -91,10 +91,10 @@ export async function GET(req: NextRequest) {
       }
 
       const conv = conversations.get(otherUserId);
-      if (message.createdAt > conv.lastMessage.createdAt) {
+      if (new Date(message.createdAt) > new Date(conv.lastMessage.createdAt)) {
         conv.lastMessage = message;
       }
-      if (!message.read && message.recipientId === user.id) {
+      if (!message.read && message.receiverId === user.id) {
         conv.unreadCount++;
       }
     });
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     const message = await db.message.create({
       data: {
         senderId: user.id,
-        recipientId,
+        receiverId: recipientId,
         listingId: listingId || null,
         content,
         read: false,
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
             lastName: true,
           },
         },
-        recipient: {
+        receiver: {
           select: {
             id: true,
             email: true,

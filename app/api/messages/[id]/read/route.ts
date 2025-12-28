@@ -26,7 +26,7 @@ export async function POST(
       return NextResponse.json({ error: 'Message not found' }, { status: 404 });
     }
 
-    if (message.recipientId !== user.id) {
+    if (message.receiverId !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
