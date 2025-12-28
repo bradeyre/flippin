@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, Edit2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Edit2, TrendingUp, AlertTriangle, Camera, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface AIAnalysisProps {
@@ -89,6 +89,136 @@ export function AIAnalysis({ analysis, pricing, answers, onConfirm, onEdit }: AI
           </div>
         )}
       </div>
+
+      {/* Photo Quality Feedback */}
+      {analysis.photoQuality && (
+        <div className={`rounded-lg p-6 mb-6 ${
+          analysis.photoQuality.overallScore >= 80
+            ? 'bg-green-50 border border-green-200'
+            : analysis.photoQuality.overallScore >= 60
+            ? 'bg-yellow-50 border border-yellow-200'
+            : 'bg-red-50 border border-red-200'
+        }`}>
+          <div className="flex items-start gap-3 mb-4">
+            <Camera className={`w-5 h-5 ${
+              analysis.photoQuality.overallScore >= 80
+                ? 'text-green-600'
+                : analysis.photoQuality.overallScore >= 60
+                ? 'text-yellow-600'
+                : 'text-red-600'
+            }`} />
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1">Photo Quality</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-gray-900">
+                  {analysis.photoQuality.overallScore}/100
+                </span>
+                {analysis.photoQuality.overallScore >= 80 && (
+                  <span className="text-sm text-green-700 font-medium">Great!</span>
+                )}
+                {analysis.photoQuality.overallScore >= 60 && analysis.photoQuality.overallScore < 80 && (
+                  <span className="text-sm text-yellow-700 font-medium">Good, but could improve</span>
+                )}
+                {analysis.photoQuality.overallScore < 60 && (
+                  <span className="text-sm text-red-700 font-medium">Needs improvement</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {analysis.photoQuality.issues && analysis.photoQuality.issues.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Issues Found:</p>
+              <ul className="space-y-1">
+                {analysis.photoQuality.issues.map((issue: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                    <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    {issue}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {analysis.photoQuality.suggestions && analysis.photoQuality.suggestions.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-orange-600" />
+                Suggestions to Improve:
+              </p>
+              <ul className="space-y-1">
+                {analysis.photoQuality.suggestions.map((suggestion: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Photo Completeness Feedback */}
+      {analysis.photoCompleteness && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div className="flex items-start gap-3 mb-4">
+            <Camera className="w-5 h-5 text-blue-600" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1">Photo Completeness</h3>
+              <p className="text-sm text-gray-600">
+                We've analyzed your photos to see if all important angles are covered
+              </p>
+            </div>
+          </div>
+
+          {analysis.photoCompleteness.missingAngles && analysis.photoCompleteness.missingAngles.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Missing Angles:</p>
+              <div className="flex flex-wrap gap-2">
+                {analysis.photoCompleteness.missingAngles.map((angle: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full"
+                  >
+                    {angle}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {analysis.photoCompleteness.recommendedAdditionalPhotos && 
+           analysis.photoCompleteness.recommendedAdditionalPhotos.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-blue-600" />
+                Recommended Additional Photos:
+              </p>
+              <ul className="space-y-2">
+                {analysis.photoCompleteness.recommendedAdditionalPhotos.map((photo: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <span>{photo}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-gray-600 mt-3 italic">
+                💡 Tip: More complete photos = faster sales and better prices!
+              </p>
+            </div>
+          )}
+
+          {(!analysis.photoCompleteness.missingAngles || analysis.photoCompleteness.missingAngles.length === 0) &&
+           (!analysis.photoCompleteness.recommendedAdditionalPhotos || 
+            analysis.photoCompleteness.recommendedAdditionalPhotos.length === 0) && (
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle2 className="w-5 h-5" />
+              <p className="font-medium">All essential angles are covered! Great job!</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pricing */}
       {pricing && (

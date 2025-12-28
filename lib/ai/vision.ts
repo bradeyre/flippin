@@ -1,5 +1,23 @@
 import { anthropic, CLAUDE_MODEL } from './client';
 
+export interface PhotoQuality {
+  overallScore: number; // 0-100
+  issues: string[];
+  suggestions: string[];
+}
+
+export interface PhotoCompleteness {
+  hasFront: boolean;
+  hasBack: boolean;
+  hasSides: boolean;
+  hasTop: boolean;
+  hasBottom: boolean;
+  hasScreen: boolean;
+  hasAccessories: boolean;
+  missingAngles: string[];
+  recommendedAdditionalPhotos: string[];
+}
+
 export interface VisionAnalysisResult {
   prohibited?: boolean;
   prohibitionReason?: string;
@@ -13,6 +31,8 @@ export interface VisionAnalysisResult {
   confidence: number;
   needsMoreInfo: boolean;
   suggestedQuestions?: string[];
+  photoQuality?: PhotoQuality;
+  photoCompleteness?: PhotoCompleteness;
 }
 
 export async function analyzeProductImages(
@@ -25,6 +45,8 @@ export async function analyzeProductImages(
 
 ${userTitle ? `User title: "${userTitle}"` : ''}
 ${userDescription ? `User description: "${userDescription}"` : ''}
+
+You have ${imageUrls.length} photo(s) to analyze.
 
 CRITICAL SAFETY & POLICY CHECKS FIRST:
 
@@ -62,6 +84,32 @@ Otherwise, analyze and extract:
 9. **NeedsMoreInfo**: true if you need more photos/details to be certain
 10. **SuggestedQuestions**: Questions to ask seller for clarity (if needsMoreInfo is true)
 
+11. **Photo Quality Analysis**:
+    - Assess overall photo quality (0-100 score)
+    - Check: lighting (too dark/bright?), focus (blurry?), background (cluttered?), angle (distorted?)
+    - List specific issues found
+    - Provide actionable suggestions to improve photos
+
+12. **Photo Completeness Analysis**:
+    - For the product category, determine what angles/photos are essential
+    - Check which angles are present: front, back, sides, top, bottom, screen (if applicable), accessories
+    - List missing angles that would help buyers
+    - Recommend specific additional photos needed (e.g., "Close-up of screen", "Photo of all sides", "Photo with accessories")
+
+PHOTO QUALITY GUIDELINES:
+- Good lighting: Clear, even lighting without harsh shadows
+- Focus: Sharp, not blurry
+- Background: Clean, uncluttered (white/neutral preferred)
+- Angle: Straight, not distorted
+- Coverage: Product fills frame appropriately
+
+PHOTO COMPLETENESS BY CATEGORY:
+- Smartphones: Front, back, all 4 sides, screen on, accessories (charger, box if available)
+- Laptops: Top (keyboard), bottom, screen open, ports/sides, accessories
+- Cameras: Front, back, top, bottom, lens close-up, accessories
+- Gaming Consoles: Front, back, all sides, ports, accessories (controllers, cables)
+- General: Front, back, sides, any unique features, accessories
+
 Return ONLY valid JSON:
 {
   "brand": "Apple",
@@ -73,7 +121,29 @@ Return ONLY valid JSON:
   "authenticity": "LIKELY_GENUINE",
   "confidence": 0.9,
   "needsMoreInfo": false,
-  "suggestedQuestions": []
+  "suggestedQuestions": [],
+  "photoQuality": {
+    "overallScore": 85,
+    "issues": ["Slight overexposure in one photo", "Background could be cleaner"],
+    "suggestions": ["Use natural lighting or soft indoor light", "Use a plain white or neutral background", "Ensure product is in focus"]
+  },
+  "photoCompleteness": {
+    "hasFront": true,
+    "hasBack": true,
+    "hasSides": false,
+    "hasTop": false,
+    "hasBottom": false,
+    "hasScreen": true,
+    "hasAccessories": false,
+    "missingAngles": ["Left side", "Right side", "Top view", "Bottom view"],
+    "recommendedAdditionalPhotos": [
+      "Photo of left side showing ports",
+      "Photo of right side showing buttons",
+      "Photo of top showing camera array",
+      "Photo of bottom showing charging port",
+      "Photo with accessories (charger, box) if available"
+    ]
+  }
 }
 
 If you can't determine model/storage from photos:
@@ -91,7 +161,27 @@ If you can't determine model/storage from photos:
     "What storage capacity? (128GB, 256GB, 512GB, 1TB)",
     "What is the battery health percentage? (Go to Settings > Battery > Battery Health)",
     "Can you upload a photo of Settings > General > About (shows IMEI & storage)?"
-  ]
+  ],
+  "photoQuality": {
+    "overallScore": 70,
+    "issues": ["Could use better lighting", "Some photos are slightly blurry"],
+    "suggestions": ["Use better lighting", "Ensure camera is in focus", "Take photos in a well-lit area"]
+  },
+  "photoCompleteness": {
+    "hasFront": true,
+    "hasBack": false,
+    "hasSides": false,
+    "hasTop": false,
+    "hasBottom": false,
+    "hasScreen": true,
+    "hasAccessories": false,
+    "missingAngles": ["Back", "All sides", "Top", "Bottom"],
+    "recommendedAdditionalPhotos": [
+      "Photo of back of phone",
+      "Photo showing all sides",
+      "Photo of Settings > General > About screen (shows model and storage)"
+    ]
+  }
 }`;
 
   // Convert image URLs to appropriate format for Claude
@@ -140,7 +230,7 @@ If you can't determine model/storage from photos:
   try {
     response = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 1024,
+      max_tokens: 2048, // Increased for more detailed analysis
       messages: [
         {
           role: 'user',
