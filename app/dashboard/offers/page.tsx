@@ -68,8 +68,23 @@ export default function MyOffersPage() {
   }
 
   async function respondToOffer(offerId: string, action: 'accept' | 'reject') {
-    // TODO: Implement offer response API
-    alert(`${action === 'accept' ? 'Accept' : 'Reject'} offer functionality coming soon`);
+    try {
+      const response = await fetch(`/api/offers/${offerId}/${action}`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to ${action} offer`);
+      }
+
+      // Refresh offers list
+      await fetchOffers();
+      alert(`Offer ${action === 'accept' ? 'accepted' : 'rejected'} successfully!`);
+    } catch (error) {
+      console.error(`Error ${action}ing offer:`, error);
+      alert(error instanceof Error ? error.message : `Failed to ${action} offer`);
+    }
   }
 
   const statusColors: Record<string, string> = {
