@@ -10,7 +10,7 @@ import { emailTemplates } from '@/lib/email/templates';
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -19,9 +19,10 @@ export async function POST(
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const { id } = await params;
 
     const transaction = await db.transaction.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         listing: true,
         seller: true,
@@ -56,7 +57,7 @@ export async function POST(
 
     // Update transaction to completed
     const updated = await db.transaction.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'COMPLETED',
         deliveryStatus: 'COMPLETED',

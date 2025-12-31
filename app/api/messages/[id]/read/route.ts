@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -17,9 +17,10 @@ export async function POST(
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const { id } = await params;
 
     const message = await db.message.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!message) {
@@ -31,7 +32,7 @@ export async function POST(
     }
 
     const updated = await db.message.update({
-      where: { id: params.id },
+      where: { id },
       data: { read: true },
     });
 

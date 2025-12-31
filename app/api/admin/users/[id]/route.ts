@@ -8,13 +8,14 @@ import { requireAdmin } from '@/lib/admin/auth';
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+    const { id } = await params;
 
     const user = await db.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         listings: {
           select: {
