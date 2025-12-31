@@ -94,10 +94,11 @@ export async function GET(
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+    const { id } = await params;
 
     const body = await req.json();
     const {
@@ -143,7 +144,7 @@ export async function PATCH(
     if (sellerId !== undefined) updateData.sellerId = sellerId;
 
     const listing = await db.listing.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         seller: {
@@ -181,13 +182,14 @@ export async function PATCH(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+    const { id } = await params;
 
     const listing = await db.listing.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'REMOVED',
       },
