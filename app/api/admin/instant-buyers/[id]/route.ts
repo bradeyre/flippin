@@ -109,7 +109,7 @@ export async function PATCH(
     if (conditionRules !== undefined) updateData.conditionRules = conditionRules;
 
     const instantBuyer = await db.instantBuyer.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         user: {
