@@ -28,31 +28,31 @@ CREATE POLICY "Public can read active listings"
 CREATE POLICY "Users can read own data"
   ON "User"
   FOR SELECT
-  USING (auth.uid() = id);
+  USING (auth.uid()::text = id);
 
 -- Users can read their own listings
 CREATE POLICY "Users can read own listings"
   ON "Listing"
   FOR SELECT
-  USING (auth.uid() = "sellerId");
+  USING (auth.uid()::text = "sellerId");
 
 -- Users can read their own transactions
 CREATE POLICY "Users can read own transactions"
   ON "Transaction"
   FOR SELECT
-  USING (auth.uid() = "sellerId" OR auth.uid() = "buyerId");
+  USING (auth.uid()::text = "sellerId" OR auth.uid()::text = "buyerId");
 
 -- Users can read their own messages
 CREATE POLICY "Users can read own messages"
   ON "Message"
   FOR SELECT
-  USING (auth.uid() = "senderId" OR auth.uid() = "receiverId");
+  USING (auth.uid()::text = "senderId" OR auth.uid()::text = "receiverId");
 
 -- Users can read their own notifications
 CREATE POLICY "Users can read own notifications"
   ON "Notification"
   FOR SELECT
-  USING (auth.uid() = "userId");
+  USING (auth.uid()::text = "userId");
 
 -- Note: For production, you'll want more granular policies
 -- This is a basic setup to address the security warnings
