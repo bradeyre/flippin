@@ -90,7 +90,7 @@ export async function POST(
       await sendEmail(
         offer.listing.seller.email,
         emailTemplates.offerAccepted(
-          offer.amount,
+          Number(offer.amount),
           offer.listing.title,
           `${offer.buyer.firstName} ${offer.buyer.lastName}`
         )
@@ -100,7 +100,7 @@ export async function POST(
       await sendEmail(
         offer.buyer.email,
         emailTemplates.offerAcceptedBuyer(
-          offer.amount,
+          Number(offer.amount),
           offer.listing.title,
           `${offer.listing.seller.firstName} ${offer.listing.seller.lastName}`
         )
