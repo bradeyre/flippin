@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if offer is reasonable (at least 50% of asking price)
-    if (amount < listing.askingPrice * 0.5) {
+    if (amount < Number(listing.askingPrice) * 0.5) {
       return NextResponse.json(
         { error: 'Offer must be at least 50% of the asking price' },
         { status: 400 }
