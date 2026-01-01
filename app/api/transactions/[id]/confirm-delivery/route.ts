@@ -60,7 +60,7 @@ export async function POST(
       where: { id },
       data: {
         status: 'COMPLETED',
-        deliveryStatus: 'COMPLETED',
+        deliveryStatus: 'DELIVERED',
         completedAt: new Date(),
       },
       include: {
