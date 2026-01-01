@@ -39,14 +39,6 @@ export async function GET(req: NextRequest) {
         where,
         skip,
         take: limit,
-        include: {
-          transaction: {
-            select: {
-              id: true,
-              status: true,
-            },
-          },
-        },
         orderBy: {
           createdAt: 'desc',
         },

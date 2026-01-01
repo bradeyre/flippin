@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
             lastName: true,
           },
         },
-        recipient: {
+        receiver: {
           select: {
             id: true,
             email: true,

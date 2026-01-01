@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       }
 
       listing = offer.listing;
-      totalAmount = offer.amount + (listing.shippingCost || 0);
+      totalAmount = Number(offer.amount) + Number(listing.shippingCost || 0);
       sellerId = listing.sellerId;
     } else {
       listing = await db.listing.findUnique({
@@ -96,9 +96,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      totalAmount = listing.askingPrice + (listing.shippingCost || 0);
+      totalAmount = Number(listing.askingPrice) + Number(listing.shippingCost || 0);
       sellerId = listing.sellerId;
     }
+
+    // Get bank details from platform settings (needed early for existing transactions)
+    const platformSettings = await db.platformSettings.findUnique({
+      where: { id: 'settings' },
+    });
 
     // Check if transaction already exists (only for active transactions)
     const existingTransaction = await db.transaction.findFirst({
@@ -132,8 +137,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculate fees based on payment method
-    const itemPrice = offer ? offer.amount : listing.askingPrice;
-    const shippingCost = listing.shippingCost || 0;
+    const itemPrice = offer ? Number(offer.amount) : Number(listing.askingPrice);
+    const shippingCost = Number(listing.shippingCost || 0);
     
     const fees = calculatePaymentFees(itemPrice, paymentMethod as 'EFT' | 'CARD');
     const { platformFee, cardFee, totalFee, sellerReceives } = fees;
@@ -168,20 +173,19 @@ export async function POST(req: NextRequest) {
         listingId: listing.id,
         sellerId,
         buyerId: user.id,
-        offerId: offer?.id || null,
-        itemPrice,
-        shippingCost,
-        totalAmount: itemPrice + shippingCost,
+        itemPrice: Number(itemPrice),
+        shippingCost: Number(shippingCost),
+        totalAmount: Number(itemPrice) + Number(shippingCost),
         platformFee,
         cardFee: paymentMethod === 'CARD' ? cardFee : 0,
         sellerReceives,
-        paymentMethod: paymentMethod as 'EFT' | 'CARD',
+        paymentMethod: paymentMethod === 'CARD' ? 'CARD' : 'BANK_TRANSFER',
         paymentReference: paymentResult.reference || paymentResult.transactionId || null,
         paymentRef: paymentResult.reference || paymentResult.transactionId || null, // Keep for backward compatibility
         status: paymentMethod === 'CARD' ? 'PAID' : 'PAYMENT_PENDING',
-        paymentStatus: paymentMethod === 'CARD' ? 'PAID' : 'PENDING',
-        deliveryStatus: 'NOT_SHIPPED',
-        transactionType: offer ? 'OFFER' : 'MARKETPLACE',
+        paymentStatus: paymentMethod === 'CARD' ? 'VERIFIED' : 'PENDING',
+        deliveryStatus: 'PENDING',
+        transactionType: 'MARKETPLACE', // Offers are also marketplace transactions
         paidAt: paymentMethod === 'CARD' ? new Date() : null,
       },
       include: {
@@ -204,11 +208,6 @@ export async function POST(req: NextRequest) {
         data: { status: 'ACCEPTED' },
       });
     }
-
-    // Get bank details from platform settings
-    const platformSettings = await db.platformSettings.findUnique({
-      where: { id: 'settings' },
-    });
 
     // Send appropriate email based on payment method
     try {

@@ -52,7 +52,7 @@ export async function POST(
 
     // Update offer status
     const updatedOffer = await db.offer.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: 'ACCEPTED' },
       include: {
         listing: true,
@@ -72,15 +72,14 @@ export async function POST(
         listingId: offer.listingId,
         sellerId: offer.listing.sellerId,
         buyerId: offer.buyerId,
-        offerId: offer.id,
-        itemPrice: offer.amount,
-        shippingCost: offer.listing.shippingCost || 0,
-        totalAmount: offer.amount + (offer.listing.shippingCost || 0),
-        platformFee: Math.round(offer.amount * 0.055), // 5.5% marketplace fee
-        sellerReceives: Math.round(offer.amount * 0.945), // Seller gets 94.5%
+        itemPrice: Number(offer.amount),
+        shippingCost: Number(offer.listing.shippingCost || 0),
+        totalAmount: Number(offer.amount) + Number(offer.listing.shippingCost || 0),
+        platformFee: Math.round(Number(offer.amount) * 0.055), // 5.5% marketplace fee
+        sellerReceives: Math.round(Number(offer.amount) * 0.945), // Seller gets 94.5%
         status: 'PAYMENT_PENDING',
         paymentStatus: 'PENDING',
-        deliveryStatus: 'NOT_SHIPPED',
+        deliveryStatus: 'PENDING',
         transactionType: 'MARKETPLACE',
       },
     });

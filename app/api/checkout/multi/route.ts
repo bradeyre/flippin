@@ -87,12 +87,13 @@ export async function POST(req: NextRequest) {
       if (paymentMethod === 'CARD') {
         // For multi-item, we'll process one payment and split it
         // For now, create separate payment intents per seller
+        // Use first listing ID for metadata (card processor expects single ID)
         paymentResult = await processCardPayment(
           sellerTotal,
           cardToken!,
           {
             sellerId,
-            listingIds: sellerListings.map(l => l.id),
+            listingId: sellerListings[0].id,
           }
         );
       } else {
@@ -113,12 +114,12 @@ export async function POST(req: NextRequest) {
           platformFee,
           cardFee: paymentMethod === 'CARD' ? cardFee : 0,
           sellerReceives,
-          paymentMethod: paymentMethod as 'EFT' | 'CARD',
+          paymentMethod: paymentMethod === 'CARD' ? 'CARD' : 'BANK_TRANSFER',
           paymentReference: paymentResult.reference || paymentResult.transactionId || null,
           paymentRef: paymentResult.reference || paymentResult.transactionId || null,
           status: paymentMethod === 'CARD' ? 'PAID' : 'PAYMENT_PENDING',
-          paymentStatus: paymentMethod === 'CARD' ? 'PAID' : 'PENDING',
-          deliveryStatus: 'NOT_SHIPPED',
+          paymentStatus: paymentMethod === 'CARD' ? 'VERIFIED' : 'PENDING',
+          deliveryStatus: 'PENDING',
           transactionType: 'MARKETPLACE',
           paidAt: paymentMethod === 'CARD' ? new Date() : null,
         },
