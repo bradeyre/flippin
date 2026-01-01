@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: paymentMethod === 'CARD' ? 'CARD' : 'BANK_TRANSFER',
         paymentReference: paymentResult.reference || paymentResult.transactionId || null,
         paymentRef: paymentResult.reference || paymentResult.transactionId || null, // Keep for backward compatibility
-        status: paymentMethod === 'CARD' ? 'PAID' : 'PAYMENT_PENDING',
+        status: paymentMethod === 'CARD' ? 'PAID' : 'PAYMENT_PENDING', // TransactionStatus.PAID exists
         paymentStatus: paymentMethod === 'CARD' ? 'VERIFIED' : 'PENDING',
         deliveryStatus: 'PENDING',
         transactionType: 'MARKETPLACE', // Offers are also marketplace transactions

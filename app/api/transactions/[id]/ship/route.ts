@@ -49,7 +49,7 @@ export async function POST(
     }
 
     // Check if payment has been received
-    if (transaction.paymentStatus !== 'PAID') {
+    if (transaction.paymentStatus !== 'VERIFIED' && transaction.paymentStatus !== 'HELD_ESCROW') {
       return NextResponse.json(
         { error: 'Payment must be received before shipping' },
         { status: 400 }
