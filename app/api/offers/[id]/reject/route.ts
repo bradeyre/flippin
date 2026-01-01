@@ -45,7 +45,7 @@ export async function POST(
 
     // Update offer status
     const updatedOffer = await db.offer.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: 'REJECTED' },
       include: {
         listing: true,
