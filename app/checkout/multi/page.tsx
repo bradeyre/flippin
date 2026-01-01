@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Lock, Loader2, AlertCircle, Package } from 'lucide-react';
@@ -338,3 +336,17 @@ function MultiItemCheckoutContent() {
   );
 }
 
+export default function MultiItemCheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-orange-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    }>
+      <MultiItemCheckoutContent />
+    </Suspense>
+  );
+}
