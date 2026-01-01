@@ -20,7 +20,7 @@ interface Listing {
   };
 }
 
-export default function MultiItemCheckoutPage() {
+function MultiItemCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
