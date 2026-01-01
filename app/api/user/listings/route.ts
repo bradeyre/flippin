@@ -47,13 +47,12 @@ export async function GET(req: NextRequest) {
               slug: true,
             },
           },
-          _count: {
-            select: {
-              offers: true,
-              instantOffers: true,
-              views: true,
+            _count: {
+              select: {
+                offers: true,
+                instantOffers: true,
+              },
             },
-          },
         },
         orderBy: {
           createdAt: 'desc',
