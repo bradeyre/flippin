@@ -13,6 +13,7 @@ interface Transaction {
   shippingCost: number;
   totalAmount: number;
   platformFee: number;
+  cardFee?: number;
   sellerReceives: number;
   transactionType: string;
   createdAt: string;
@@ -309,7 +310,7 @@ export default function MyTransactionsPage() {
                                     </span>
                                   </div>
                                 )}
-                                {(!transaction.cardFee || transaction.cardFee === 0) && transaction.paymentMethod === 'EFT' && (
+                                {(!transaction.cardFee || transaction.cardFee === 0) && (transaction as any).paymentMethod === 'EFT' && (
                                   <div className="flex items-center justify-between">
                                     <span className="text-gray-600">
                                       Card Processing Fee

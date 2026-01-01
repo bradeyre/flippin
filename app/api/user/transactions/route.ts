@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
         shippingCost: Number(t.shippingCost),
         totalAmount: Number(t.totalAmount),
         platformFee: Number(t.platformFee),
+        cardFee: Number(t.cardFee),
         sellerReceives: Number(t.sellerReceives),
         transactionType: t.transactionType,
         createdAt: t.createdAt,
