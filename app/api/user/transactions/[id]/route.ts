@@ -52,13 +52,6 @@ export async function GET(
             verified: true,
           },
         },
-        offer: {
-          select: {
-            id: true,
-            amount: true,
-            message: true,
-          },
-        },
       },
     });
 
