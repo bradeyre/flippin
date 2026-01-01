@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Lock, Loader2, AlertCircle, Package } from 'lucide-react';
 import Link from 'next/link';
