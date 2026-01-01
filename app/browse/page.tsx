@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, SlidersHorizontal, MapPin, Heart, TrendingUp } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, MapPin, Heart, TrendingUp, Package } from 'lucide-react';
 import Link from 'next/link';
 
 interface Listing {
