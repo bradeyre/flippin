@@ -298,7 +298,7 @@ export default function MyTransactionsPage() {
                                     -R{transaction.platformFee.toLocaleString()}
                                   </span>
                                 </div>
-                                {transaction.cardFee && transaction.cardFee > 0 && (
+                                {(transaction as any).cardFee && (transaction as any).cardFee > 0 && (
                                   <div className="flex items-center justify-between">
                                     <span className="text-gray-600">
                                       Card Processing Fee (2%)
