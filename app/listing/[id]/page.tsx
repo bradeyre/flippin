@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { MapPin, User, Shield, Heart, MessageSquare, TrendingUp, Package, Truck } from 'lucide-react';
 import Link from 'next/link';
 
