@@ -306,7 +306,7 @@ export default function MyTransactionsPage() {
                                       <span className="ml-2 text-xs text-gray-500">(paid by card)</span>
                                     </span>
                                     <span className="font-medium text-red-600">
-                                      -R{transaction.cardFee.toLocaleString()}
+                                      -R{(transaction.cardFee || 0).toLocaleString()}
                                     </span>
                                   </div>
                                 )}
