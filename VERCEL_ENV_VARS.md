@@ -16,10 +16,18 @@ NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
-- Get from Supabase Dashboard → Settings → API
-- `NEXT_PUBLIC_SUPABASE_URL`: Project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: anon/public key
-- `SUPABASE_SERVICE_ROLE_KEY`: service_role key (keep secret!)
+
+**Where to find these keys:**
+1. Go to your Supabase Dashboard: https://supabase.com/dashboard
+2. Select your project
+3. Go to **Settings** → **API**
+4. You'll see two tabs:
+   - **"Publishable and secret API keys"** (new format)
+   - **"Legacy anon, service_role API keys"** ← **Click this tab!**
+5. In the Legacy tab, you'll find:
+   - **`anon` `public`** key → Use for `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **`service_role` `secret`** key → Use for `SUPABASE_SERVICE_ROLE_KEY` (⚠️ Keep this secret!)
+6. `NEXT_PUBLIC_SUPABASE_URL`: Your Project URL (shown at the top of the API page)
 
 ### Anthropic AI
 ```
