@@ -43,4 +43,4 @@ export const anthropic = new Proxy({} as Anthropic, {
   }
 });
 
-export const CLAUDE_MODEL = 'claude-3-5-sonnet-20241022';
+export const CLAUDE_MODEL = 'claude-3-5-sonnet-20240620';
