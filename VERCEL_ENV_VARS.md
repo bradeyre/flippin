@@ -65,6 +65,21 @@ NODE_ENV=production
    - **Environment**: Select all (Production, Preview, Development)
 4. Click **Save**
 
+## ✅ Required vs Optional
+
+**Required for basic functionality:**
+- `DATABASE_URL` ✅
+- `NEXT_PUBLIC_SUPABASE_URL` ✅
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` ✅
+- `SUPABASE_SERVICE_ROLE_KEY` ✅
+- `ANTHROPIC_API_KEY` ⚠️ **MISSING** - Required for AI features (image analysis, listing generation, pricing)
+
+**Optional (can add later):**
+- `CLOUDFLARE_R2_*` - Only needed if using R2 for image storage
+- `NEXT_PUBLIC_APP_URL` - Can set after first deployment
+- `NODE_ENV` - Vercel sets this automatically
+- `RESEND_API_KEY` - Only needed for real email sending
+
 ## Important Notes
 
 - ✅ All `NEXT_PUBLIC_*` variables are exposed to the browser
