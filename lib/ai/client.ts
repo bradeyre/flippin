@@ -43,4 +43,6 @@ export const anthropic = new Proxy({} as Anthropic, {
   }
 });
 
-export const CLAUDE_MODEL = 'claude-3-5-sonnet-20240620';
+// Use model without date suffix to get the latest version
+// Alternative: 'claude-3-5-sonnet-20240229' if this doesn't work
+export const CLAUDE_MODEL = 'claude-3-5-sonnet';
