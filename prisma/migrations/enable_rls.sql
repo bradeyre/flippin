@@ -17,42 +17,61 @@ ALTER TABLE "PlatformSettings" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "LedgerEntry" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "_BuyOrderToListing" ENABLE ROW LEVEL SECURITY;
 
--- Create policies for public read access (for marketplace listings)
--- Users can read active listings
-CREATE POLICY "Public can read active listings"
-  ON "Listing"
-  FOR SELECT
-  USING (status = 'ACTIVE');
+-- Drop existing policies if they exist (for re-running)
+DROP POLICY IF EXISTS "Public can read active listings" ON "Listing";
+DROP POLICY IF EXISTS "Users can read own listings" ON "Listing";
+DROP POLICY IF EXISTS "Users can read own data" ON "User";
+DROP POLICY IF EXISTS "Users can read own transactions" ON "Transaction";
+DROP POLICY IF EXISTS "Users can read own messages" ON "Message";
+DROP POLICY IF EXISTS "Users can read own notifications" ON "Notification";
 
 -- Users can read their own data
+-- Fixed: Use current_setting pattern to avoid re-evaluation per row
 CREATE POLICY "Users can read own data"
   ON "User"
   FOR SELECT
-  USING (auth.uid()::text = id);
+  USING (
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = id
+  );
 
--- Users can read their own listings
-CREATE POLICY "Users can read own listings"
+-- Listing: Combined SELECT policy (fixes Multiple Permissive Policies warning)
+-- Public can read active listings OR users can read their own listings
+CREATE POLICY "Listing read access"
   ON "Listing"
   FOR SELECT
-  USING (auth.uid()::text = "sellerId");
+  USING (
+    status = 'ACTIVE' OR
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "sellerId"
+  );
 
 -- Users can read their own transactions
+-- Fixed: Use current_setting pattern to avoid re-evaluation
 CREATE POLICY "Users can read own transactions"
   ON "Transaction"
   FOR SELECT
-  USING (auth.uid()::text = "sellerId" OR auth.uid()::text = "buyerId");
+  USING (
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "sellerId" OR
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "buyerId"
+  );
 
 -- Users can read their own messages
+-- Fixed: Use current_setting pattern
 CREATE POLICY "Users can read own messages"
   ON "Message"
   FOR SELECT
-  USING (auth.uid()::text = "senderId" OR auth.uid()::text = "receiverId");
+  USING (
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "senderId" OR
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "receiverId"
+  );
 
 -- Users can read their own notifications
+-- Fixed: Use current_setting pattern
 CREATE POLICY "Users can read own notifications"
   ON "Notification"
   FOR SELECT
-  USING (auth.uid()::text = "userId");
+  USING (
+    (current_setting('request.jwt.claims', true)::json->>'sub')::text = "userId"
+  );
 
 -- Note: For production, you'll want more granular policies
 -- This is a basic setup to address the security warnings
