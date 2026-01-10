@@ -36,16 +36,33 @@ ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
 - Get from https://console.anthropic.com/
 - Used for: AI image analysis, listing generation, pricing, questions
 
-### Cloudflare R2 (Image Storage)
+### Cloudflare R2 (Image Storage) ⚠️ REQUIRED for Image Uploads
 ```
 CLOUDFLARE_R2_ACCOUNT_ID=your_account_id
 CLOUDFLARE_R2_ACCESS_KEY=your_access_key
 CLOUDFLARE_R2_SECRET_KEY=your_secret_key
 CLOUDFLARE_R2_BUCKET_NAME=flippin-images
-NEXT_PUBLIC_R2_PUBLIC_URL=https://your_account_id.r2.cloudflarestorage.com/flippin-images
+NEXT_PUBLIC_R2_PUBLIC_URL=https://pub-xxxxx.r2.dev/flippin-images
 ```
-- Get from Cloudflare Dashboard → R2
-- Can be set up later if needed
+
+**How to set up Cloudflare R2:**
+1. Go to https://dash.cloudflare.com/
+2. Select your account (or create one if needed)
+3. Go to **R2** → **Create bucket**
+4. Name it `flippin-images` (or your preferred name)
+5. Go to **Manage R2 API Tokens** → **Create API Token**
+   - Permissions: **Object Read & Write**
+   - TTL: Leave empty (or set expiration)
+   - Copy the **Access Key ID** → `CLOUDFLARE_R2_ACCESS_KEY`
+   - Copy the **Secret Access Key** → `CLOUDFLARE_R2_SECRET_KEY`
+6. Get your **Account ID** from the R2 dashboard (top right, under your account name)
+7. Set up a **Public Domain** (for `NEXT_PUBLIC_R2_PUBLIC_URL`):
+   - In your bucket settings, go to **Settings** → **Public Access**
+   - Click **Connect Domain** or use the default R2.dev domain
+   - Format: `https://pub-xxxxx.r2.dev/flippin-images` (replace `xxxxx` with your domain ID)
+8. Add all 5 variables to Vercel
+
+**⚠️ Without these, image uploads will fail with "Image storage not configured" error**
 
 ### App Configuration
 ```
@@ -72,10 +89,14 @@ NODE_ENV=production
 - `NEXT_PUBLIC_SUPABASE_URL` ✅
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` ✅
 - `SUPABASE_SERVICE_ROLE_KEY` ✅
-- `ANTHROPIC_API_KEY` ⚠️ **MISSING** - Required for AI features (image analysis, listing generation, pricing)
+- `ANTHROPIC_API_KEY` ⚠️ **REQUIRED** - For AI features (image analysis, listing generation, pricing)
+- `CLOUDFLARE_R2_ACCOUNT_ID` ⚠️ **REQUIRED** - For image uploads
+- `CLOUDFLARE_R2_ACCESS_KEY` ⚠️ **REQUIRED** - For image uploads
+- `CLOUDFLARE_R2_SECRET_KEY` ⚠️ **REQUIRED** - For image uploads
+- `CLOUDFLARE_R2_BUCKET_NAME` ⚠️ **REQUIRED** - For image uploads
+- `NEXT_PUBLIC_R2_PUBLIC_URL` ⚠️ **REQUIRED** - For image uploads
 
 **Optional (can add later):**
-- `CLOUDFLARE_R2_*` - Only needed if using R2 for image storage
 - `NEXT_PUBLIC_APP_URL` - Can set after first deployment
 - `NODE_ENV` - Vercel sets this automatically
 - `RESEND_API_KEY` - Only needed for real email sending

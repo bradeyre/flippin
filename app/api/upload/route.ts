@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         {
           error: 'Image storage not configured',
           details: `Missing environment variables: ${missingVars.join(', ')}`,
-          hint: 'Please configure Cloudflare R2 credentials in your .env file'
+          hint: 'Please configure Cloudflare R2 credentials in Vercel: Settings → Environment Variables. See VERCEL_ENV_VARS.md for setup instructions.'
         },
         { status: 500 }
       );
