@@ -1,4 +1,4 @@
-import { anthropic, CLAUDE_MODEL } from './client';
+import { anthropic, CLAUDE_MODEL, logApiCall } from './client';
 import { retryWithBackoff } from '@/lib/utils/retry';
 
 export interface PhotoQuality {
@@ -232,19 +232,34 @@ If you can't determine model/storage from photos:
     // Use retry logic with exponential backoff for rate limits and transient errors
     response = await retryWithBackoff(
       async () => {
-        return await anthropic.messages.create({
-          model: CLAUDE_MODEL,
-          max_tokens: 2048, // Increased for more detailed analysis
-          messages: [
-            {
-              role: 'user',
-              content: [
-                ...imageContent,
-                { type: 'text' as const, text: prompt },
-              ],
-            },
-          ],
-        });
+        const startTime = Date.now();
+        logApiCall('analyzeProductImages', CLAUDE_MODEL);
+        
+        try {
+          const result = await anthropic.messages.create({
+            model: CLAUDE_MODEL,
+            max_tokens: 2048, // Increased for more detailed analysis
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  ...imageContent,
+                  { type: 'text' as const, text: prompt },
+                ],
+              },
+            ],
+          });
+          
+          // Log successful call with request ID
+          const requestId = (result as any).request_id || 'unknown';
+          logApiCall('analyzeProductImages', CLAUDE_MODEL, requestId, 200);
+          return result;
+        } catch (error: any) {
+          const requestId = error?.request_id || error?.requestId || 'unknown';
+          const status = error?.status || error?.statusCode;
+          logApiCall('analyzeProductImages', CLAUDE_MODEL, requestId, status, error?.message);
+          throw error;
+        }
       },
       {
         maxRetries: 3,
@@ -262,12 +277,23 @@ If you can't determine model/storage from photos:
 
     console.log('Anthropic API response received');
   } catch (apiError: any) {
+    const requestId = apiError?.request_id || apiError?.requestId || 'unknown';
+    const status = apiError?.status || apiError?.statusCode;
+    
     console.error('Anthropic API error (after retries):', {
       error: apiError,
       message: apiError?.message,
-      status: apiError?.status,
-      statusCode: apiError?.statusCode,
+      status,
+      statusCode: status,
       type: apiError?.type,
+      requestId,
+      retryAfter: apiError?.retry_after || apiError?.headers?.['retry-after'],
+      // Log rate limit info if available
+      rateLimitInfo: status === 429 ? {
+        retryAfter: apiError?.retry_after || apiError?.headers?.['retry-after'],
+        errorType: apiError?.error?.type,
+        errorMessage: apiError?.error?.message,
+      } : undefined,
     });
     
     // Provide more helpful error messages

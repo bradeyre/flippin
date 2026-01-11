@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { analyzeProductImages } from '@/lib/ai/vision';
 import { generatePricing } from '@/lib/ai/pricing';
 import { createClient } from '@/lib/supabase/server';
+import { getApiCallStats } from '@/lib/ai/client';
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,14 +40,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Log API stats before making call
+    const statsBefore = getApiCallStats();
+    console.log('API Call Stats Before:', {
+      totalCalls: statsBefore.totalCalls,
+      callsLastMinute: statsBefore.callsLastMinute,
+      callsLast5Minutes: statsBefore.callsLast5Minutes,
+      recentErrors: statsBefore.errors.length,
+    });
+
     // AI vision analysis
-    console.log('Starting AI vision analysis...');
+    console.log('Starting AI vision analysis...', {
+      imageCount: imageUrls.length,
+      timestamp: new Date().toISOString(),
+    });
+    
+    const startTime = Date.now();
     const visionAnalysis = await analyzeProductImages(
       imageUrls,
       userTitle,
       userDescription
     );
-    console.log('Vision analysis complete:', visionAnalysis);
+    const duration = Date.now() - startTime;
+    
+    // Log API stats after call
+    const statsAfter = getApiCallStats();
+    console.log('Vision analysis complete:', {
+      duration: `${duration}ms`,
+      apiStats: {
+        totalCalls: statsAfter.totalCalls,
+        callsLastMinute: statsAfter.callsLastMinute,
+        callsLast5Minutes: statsAfter.callsLast5Minutes,
+      },
+    });
 
     // Pricing is now optional - only generate if explicitly requested
     // This reduces API calls and avoids rate limits
