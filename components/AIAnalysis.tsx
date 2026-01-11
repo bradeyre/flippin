@@ -36,7 +36,11 @@ export function AIAnalysis({ analysis, pricing, answers, productName, onConfirm,
       setIsGeneratingCopy(true);
       try {
         const copy = await generateListingCopy(analysis, JSON.stringify(answers || {}));
-        setListingCopy(copy);
+        setListingCopy({
+          title: copy.title,
+          description: copy.description,
+          tags: copy.suggestedTags, // Map suggestedTags to tags
+        });
       } catch (error) {
         console.error('Error generating listing copy:', error);
       } finally {
