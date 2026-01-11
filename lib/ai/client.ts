@@ -43,6 +43,7 @@ export const anthropic = new Proxy({} as Anthropic, {
   }
 });
 
-// Use model without date suffix to get the latest version
-// Alternative: 'claude-3-5-sonnet-20240229' if this doesn't work
-export const CLAUDE_MODEL = 'claude-3-5-sonnet';
+// Use the alias format recommended by Anthropic (automatically uses latest version)
+// Full dated identifier: 'claude-sonnet-4-5-20250929'
+// See: https://docs.anthropic.com/en/docs/about-claude/models
+export const CLAUDE_MODEL = 'claude-sonnet-4-5';
