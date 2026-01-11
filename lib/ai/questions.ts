@@ -107,7 +107,8 @@ Return ONLY valid JSON:
       backoffMultiplier: 2,
       retryableErrors: (error: any) => {
         const status = error?.status || error?.statusCode;
-        return status === 429 || (status >= 500 && status < 600);
+        // Only retry on server errors (5xx), NOT on rate limits (429)
+        return status >= 500 && status < 600;
       },
     }
   );
@@ -165,7 +166,8 @@ Return ONLY valid JSON in the same format as before.`;
       backoffMultiplier: 2,
       retryableErrors: (error: any) => {
         const status = error?.status || error?.statusCode;
-        return status === 429 || (status >= 500 && status < 600);
+        // Only retry on server errors (5xx), NOT on rate limits (429)
+        return status >= 500 && status < 600;
       },
     }
   );

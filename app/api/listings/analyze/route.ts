@@ -48,17 +48,21 @@ export async function POST(req: NextRequest) {
     );
     console.log('Vision analysis complete:', visionAnalysis);
 
-    // Get pricing if we have enough info
+    // Pricing is now optional - only generate if explicitly requested
+    // This reduces API calls and avoids rate limits
+    // Pricing can be generated later when user confirms listing
     let pricing = null;
-    if (!visionAnalysis.needsMoreInfo) {
-      pricing = await generatePricing(
-        visionAnalysis.brand,
-        visionAnalysis.model,
-        visionAnalysis.variant || null,
-        visionAnalysis.condition,
-        visionAnalysis.category
-      );
-    }
+    // TODO: Make pricing optional via query param or separate endpoint
+    // For now, skip pricing to reduce API calls
+    // if (!visionAnalysis.needsMoreInfo) {
+    //   pricing = await generatePricing(
+    //     visionAnalysis.brand,
+    //     visionAnalysis.model,
+    //     visionAnalysis.variant || null,
+    //     visionAnalysis.condition,
+    //     visionAnalysis.category
+    //   );
+    // }
 
     return NextResponse.json({
       visionAnalysis,

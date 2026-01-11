@@ -24,10 +24,18 @@ export default function SellPage() {
     buyerNetwork: boolean;
   }>({ marketplace: true, buyerNetwork: false });
   const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // Prevent duplicate requests
 
   async function handleImagesUploaded(urls: string[]) {
+    // Prevent duplicate requests
+    if (isAnalyzing) {
+      console.log('Analysis already in progress, ignoring duplicate request');
+      return;
+    }
+
     setImageUrls(urls);
     setStep('analyzing');
+    setIsAnalyzing(true);
 
     try {
       const response = await fetch('/api/listings/analyze', {
@@ -86,6 +94,8 @@ export default function SellPage() {
           : 'Failed to analyze images. Please try again.';
       alert(`❌ ${errorMessage}\n\nPlease check your internet connection and try again.`);
       setStep('upload');
+    } finally {
+      setIsAnalyzing(false);
     }
   }
 

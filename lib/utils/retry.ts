@@ -17,9 +17,10 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
   maxDelayMs: 30000, // 30 seconds
   backoffMultiplier: 2,
   retryableErrors: (error: any) => {
-    // Retry on rate limits (429) and server errors (5xx)
+    // Only retry on server errors (5xx), NOT on rate limits (429)
+    // Rate limits should fail fast to avoid making the problem worse
     const status = error?.status || error?.statusCode;
-    return status === 429 || (status >= 500 && status < 600);
+    return status >= 500 && status < 600;
   },
 };
 

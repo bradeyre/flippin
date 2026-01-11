@@ -251,11 +251,12 @@ If you can't determine model/storage from photos:
         initialDelayMs: 2000, // Start with 2 second delay
         maxDelayMs: 30000, // Max 30 second delay
         backoffMultiplier: 2,
-        retryableErrors: (error: any) => {
-          const status = error?.status || error?.statusCode;
-          // Retry on rate limits (429) and server errors (5xx)
-          return status === 429 || (status >= 500 && status < 600);
-        },
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        // Only retry on server errors (5xx), NOT on rate limits (429)
+        // Retrying on rate limits makes the problem worse
+        return status >= 500 && status < 600;
+      },
       }
     );
 
@@ -340,7 +341,8 @@ Update the analysis with any new information. Return complete updated JSON in sa
       backoffMultiplier: 2,
       retryableErrors: (error: any) => {
         const status = error?.status || error?.statusCode;
-        return status === 429 || (status >= 500 && status < 600);
+        // Only retry on server errors (5xx), NOT on rate limits (429)
+        return status >= 500 && status < 600;
       },
     }
   );

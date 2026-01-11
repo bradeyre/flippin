@@ -89,7 +89,8 @@ Return ONLY JSON:
       backoffMultiplier: 2,
       retryableErrors: (error: any) => {
         const status = error?.status || error?.statusCode;
-        return status === 429 || (status >= 500 && status < 600);
+        // Only retry on server errors (5xx), NOT on rate limits (429)
+        return status >= 500 && status < 600;
       },
     }
   );
