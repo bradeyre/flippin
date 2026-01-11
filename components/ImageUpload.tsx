@@ -11,6 +11,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,12 +37,15 @@ export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
       return;
     }
 
-    setUploading(true);
+    setCompressing(true);
 
     try {
       // Compress images before upload to avoid 413 errors
       const filesToUpload = previews.map(p => p.file);
       const compressedFiles = await compressImages(filesToUpload);
+      
+      setCompressing(false);
+      setUploading(true);
       
       const uploadedUrls: string[] = [];
 
@@ -93,6 +97,7 @@ export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
         alert(`Upload failed: ${errorMessage}`);
       }
       setUploading(false);
+      setCompressing(false);
     }
   }
 
@@ -189,10 +194,15 @@ export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
             </button>
             <button
               onClick={handleUpload}
-              disabled={uploading}
+              disabled={uploading || compressing}
               className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {uploading ? (
+              {compressing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Compressing...
+                </>
+              ) : uploading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Uploading...
