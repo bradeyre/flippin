@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { ProductNameInput } from '@/components/ProductNameInput';
 import { ImageUpload } from '@/components/ImageUpload';
 import { AIAnalysis } from '@/components/AIAnalysis';
-import { QualifyingQuestions } from '@/components/QualifyingQuestions';
+import { ConversationalQuestions } from '@/components/ConversationalQuestions';
 import { InstantOffers } from '@/components/InstantOffers';
 import { DistributionOptions } from '@/components/DistributionOptions';
 import { Modal } from '@/components/Modal';
 import { useModal } from '@/lib/utils/modal';
 
-type Step = 'upload' | 'analyzing' | 'questions' | 'confirm' | 'delivery' | 'offers' | 'distribution' | 'complete';
+type Step = 'productName' | 'upload' | 'analyzing' | 'questions' | 'confirm' | 'delivery' | 'offers' | 'distribution' | 'complete';
 
 export default function SellPage() {
-  const [step, setStep] = useState<Step>('upload');
+  const [step, setStep] = useState<Step>('productName');
+  const [productName, setProductName] = useState<string>('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
   const [pricing, setPricing] = useState<any>(null);
@@ -29,6 +31,11 @@ export default function SellPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false); // Prevent duplicate requests
   const { modal, showError, showWarning, closeModal } = useModal();
 
+  function handleProductNameEntered(name: string) {
+    setProductName(name);
+    setStep('upload');
+  }
+
   async function handleImagesUploaded(urls: string[]) {
     // Prevent duplicate requests
     if (isAnalyzing) {
@@ -41,10 +48,14 @@ export default function SellPage() {
     setIsAnalyzing(true);
 
     try {
+      // Pass product name to help AI understand better
       const response = await fetch('/api/listings/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrls: urls }),
+        body: JSON.stringify({ 
+          imageUrls: urls,
+          userTitle: productName, // Pass product name as hint
+        }),
       });
 
       if (!response.ok) {
@@ -168,23 +179,29 @@ export default function SellPage() {
         {/* Progress Steps */}
         <div className="mb-12">
           <div className="flex items-center justify-between">
-            {['Upload', 'Analyze', 'Confirm', 'Offers', 'List'].map((label, idx) => (
-              <div key={label} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    idx <= ['upload', 'analyzing', 'questions', 'confirm', 'offers', 'distribution', 'complete'].indexOf(step)
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-300 text-gray-600'
-                  }`}
-                >
-                  {idx + 1}
+            {['What', 'Photos', 'Analyze', 'Questions', 'Confirm'].map((label, idx) => {
+              const stepOrder = ['productName', 'upload', 'analyzing', 'questions', 'confirm', 'offers', 'distribution', 'complete'];
+              const currentStepIdx = stepOrder.indexOf(step);
+              const isActive = idx <= currentStepIdx;
+              
+              return (
+                <div key={label} className="flex items-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      isActive
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {idx + 1}
+                  </div>
+                  <span className="ml-2 text-sm font-medium text-gray-700 hidden md:inline">
+                    {label}
+                  </span>
+                  {idx < 4 && <div className={`w-12 h-0.5 mx-4 hidden md:block ${isActive ? 'bg-orange-600' : 'bg-gray-300'}`} />}
                 </div>
-                <span className="ml-2 text-sm font-medium text-gray-700 hidden md:inline">
-                  {label}
-                </span>
-                {idx < 4 && <div className="w-12 h-0.5 bg-gray-300 mx-4 hidden md:block" />}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -213,9 +230,14 @@ export default function SellPage() {
             </div>
           )}
 
+          {step === 'productName' && (
+            <ProductNameInput onComplete={handleProductNameEntered} />
+          )}
+
           {step === 'questions' && analysis && (
-            <QualifyingQuestions
+            <ConversationalQuestions
               analysis={analysis}
+              productName={productName}
               onComplete={handleQuestionsAnswered}
             />
           )}

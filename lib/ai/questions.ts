@@ -23,11 +23,14 @@ export interface QuestionSet {
  */
 export async function generateProductQuestions(
   visionAnalysis: VisionAnalysisResult,
-  existingAnswers?: Record<string, any>
+  existingAnswers?: Record<string, any>,
+  productName?: string,
+  previousQuestions?: DynamicQuestion[]
 ): Promise<QuestionSet> {
-  const prompt = `You are helping a seller list their item on a South African marketplace.
+  const prompt = `You are helping a seller list their item on a South African marketplace. Make this feel like a friendly conversation, not a form.
 
 PRODUCT DETAILS:
+- Product Name: ${productName || 'Not provided'}
 - Brand: ${visionAnalysis.brand}
 - Model: ${visionAnalysis.model}
 - Variant: ${visionAnalysis.variant || 'N/A'}
@@ -36,6 +39,9 @@ PRODUCT DETAILS:
 - Detected Issues: ${visionAnalysis.detectedIssues.join(', ') || 'None'}
 
 ${existingAnswers ? `ALREADY ANSWERED:\n${JSON.stringify(existingAnswers, null, 2)}` : ''}
+${previousQuestions ? `PREVIOUS QUESTIONS ASKED:\n${previousQuestions.map(q => q.question).join('\n')}` : ''}
+
+CRITICAL: Avoid contradictory questions! If you already asked about fuel type (e.g., "What fuel does this use?"), DON'T ask about gas leaks unless it's a gas-powered item. Use context from previous answers.
 
 Generate 5-10 SPECIFIC, PRODUCT-RELEVANT questions that buyers would want to know.
 
@@ -48,11 +54,14 @@ EXAMPLES:
 
 RULES:
 1. Ask SPECIFIC questions buyers care about for THIS product type
-2. Mix question types: some yes/no, some text, some numbers, some multi-select
-3. Don't ask obvious things already visible in photos
-4. Focus on: accessories, specs not visible, usage history, what's included
-5. Make questions friendly and conversational
-6. Include helpful hints where relevant (e.g., "Check Settings > Battery > Battery Health")
+2. Use the product name to guide questions - if it's a "Cobb cooker", ask about Cobb-specific things
+3. Mix question types: some yes/no, some text, some numbers, some multi-select
+4. Don't ask obvious things already visible in photos
+5. Focus on: accessories, specs not visible, usage history, what's included
+6. Make questions friendly and conversational - like chatting with a friend
+7. AVOID CONTRADICTIONS: If you asked about fuel type, don't ask about gas leaks unless it's gas-powered. Use context!
+8. Include helpful hints where relevant (e.g., "Check Settings > Battery > Battery Health")
+9. If productName is provided, use it to better understand the product and ask relevant questions
 
 Return ONLY valid JSON:
 {

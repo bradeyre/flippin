@@ -3,7 +3,7 @@ import { generateProductQuestions } from '@/lib/ai/questions';
 
 export async function POST(req: NextRequest) {
   try {
-    const { visionAnalysis } = await req.json();
+    const { visionAnalysis, productName, existingAnswers, previousQuestions } = await req.json();
 
     if (!visionAnalysis) {
       return NextResponse.json(
@@ -12,7 +12,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const questionSet = await generateProductQuestions(visionAnalysis);
+    const questionSet = await generateProductQuestions(
+      visionAnalysis,
+      existingAnswers,
+      productName,
+      previousQuestions
+    );
 
     return NextResponse.json(questionSet);
   } catch (error) {

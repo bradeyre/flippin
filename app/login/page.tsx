@@ -70,7 +70,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome back! 👋</h1>
-          <p className="text-gray-600">Sign in to continue selling (or buying) awesome stuff</p>
+          <p className="text-gray-700 font-medium">Sign in to continue selling (or buying) awesome stuff</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
@@ -82,7 +82,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
                 Email address
               </label>
               <input
@@ -91,7 +91,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="you@example.com"
               />
             </div>
@@ -116,16 +116,16 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700">
               New to Flippin?{' '}
-              <Link href="/signup" className="text-orange-600 hover:text-orange-700 font-medium">
+              <Link href="/signup" className="text-orange-600 hover:text-orange-700 font-semibold">
                 Create an account
               </Link>
             </p>
           </div>
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-gray-600">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
