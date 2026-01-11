@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Upload, X, Camera } from 'lucide-react';
+import { compressImages } from '@/lib/utils/image-compression';
 
 interface ImageUploadProps {
   onComplete: (urls: string[]) => void;
@@ -38,12 +39,18 @@ export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
     setUploading(true);
 
     try {
+      // Compress images before upload to avoid 413 errors
+      const filesToUpload = previews.map(p => p.file);
+      const compressedFiles = await compressImages(filesToUpload);
+      
       const uploadedUrls: string[] = [];
 
-      for (const preview of previews) {
+      for (let i = 0; i < compressedFiles.length; i++) {
+        const compressedFile = compressedFiles[i];
+        
         // Upload to R2 storage
         const formData = new FormData();
-        formData.append('file', preview.file);
+        formData.append('file', compressedFile);
 
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
@@ -52,6 +59,14 @@ export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
 
         if (!uploadResponse.ok) {
           const errorData = await uploadResponse.json().catch(() => ({}));
+          
+          // Handle 413 specifically
+          if (uploadResponse.status === 413) {
+            throw new Error(
+              'Image is too large even after compression. Please try smaller images or fewer photos.'
+            );
+          }
+          
           throw new Error(
             errorData.error || errorData.details || 'Failed to upload image'
           );

@@ -13,6 +13,10 @@ const s3Client = new S3Client({
   tls: true,
 });
 
+// Increase body size limit for image uploads
+export const maxDuration = 30; // 30 seconds max
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -85,6 +89,18 @@ export async function POST(request: NextRequest) {
           hint: 'Please configure Cloudflare R2 credentials in Vercel: Settings → Environment Variables. See VERCEL_ENV_VARS.md for setup instructions.'
         },
         { status: 500 }
+      );
+    }
+
+    // Check for 413 Payload Too Large (happens before our code runs)
+    if (errorMessage.includes('413') || errorMessage.includes('Payload Too Large') || errorMessage.includes('body size limit')) {
+      return NextResponse.json(
+        {
+          error: 'Image too large',
+          details: 'The image file is too large to upload. Please compress or resize your images before uploading.',
+          hint: 'Maximum upload size is approximately 4.5MB. Try compressing your images or uploading fewer photos at once.'
+        },
+        { status: 413 }
       );
     }
 
