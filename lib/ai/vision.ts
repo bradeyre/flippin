@@ -1,4 +1,5 @@
 import { anthropic, CLAUDE_MODEL } from './client';
+import { retryWithBackoff } from '@/lib/utils/retry';
 
 export interface PhotoQuality {
   overallScore: number; // 0-100
@@ -228,23 +229,39 @@ If you can't determine model/storage from photos:
 
   let response;
   try {
-    response = await anthropic.messages.create({
-      model: CLAUDE_MODEL,
-      max_tokens: 2048, // Increased for more detailed analysis
-      messages: [
-        {
-          role: 'user',
-          content: [
-            ...imageContent,
-            { type: 'text' as const, text: prompt },
+    // Use retry logic with exponential backoff for rate limits and transient errors
+    response = await retryWithBackoff(
+      async () => {
+        return await anthropic.messages.create({
+          model: CLAUDE_MODEL,
+          max_tokens: 2048, // Increased for more detailed analysis
+          messages: [
+            {
+              role: 'user',
+              content: [
+                ...imageContent,
+                { type: 'text' as const, text: prompt },
+              ],
+            },
           ],
+        });
+      },
+      {
+        maxRetries: 3,
+        initialDelayMs: 2000, // Start with 2 second delay
+        maxDelayMs: 30000, // Max 30 second delay
+        backoffMultiplier: 2,
+        retryableErrors: (error: any) => {
+          const status = error?.status || error?.statusCode;
+          // Retry on rate limits (429) and server errors (5xx)
+          return status === 429 || (status >= 500 && status < 600);
         },
-      ],
-    });
+      }
+    );
 
     console.log('Anthropic API response received');
   } catch (apiError: any) {
-    console.error('Anthropic API error:', {
+    console.error('Anthropic API error (after retries):', {
       error: apiError,
       message: apiError?.message,
       status: apiError?.status,
@@ -296,22 +313,37 @@ Now analyzing additional photos provided by the seller.
 
 Update the analysis with any new information. Return complete updated JSON in same format.`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          ...additionalImageUrls.map(url => ({
-            type: 'image' as const,
-            source: { type: 'url' as const, url },
-          })),
-          { type: 'text' as const, text: prompt },
+  // Use retry logic with exponential backoff for rate limits
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              ...additionalImageUrls.map(url => ({
+                type: 'image' as const,
+                source: { type: 'url' as const, url },
+              })),
+              { type: 'text' as const, text: prompt },
+            ],
+          },
         ],
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
       },
-    ],
-  });
+    }
+  );
 
   const textContent = response.content.find(c => c.type === 'text');
   if (!textContent || textContent.type !== 'text') {

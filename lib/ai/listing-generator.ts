@@ -1,5 +1,6 @@
 import { anthropic, CLAUDE_MODEL } from './client';
 import { VisionAnalysisResult } from './vision';
+import { retryWithBackoff } from '@/lib/utils/retry';
 
 export interface GeneratedListing {
   title: string;
@@ -73,11 +74,25 @@ Return ONLY JSON:
   "suggestedTags": ["iphone", "apple", "smartphone", "iphone 13 pro", "256gb", "unlocked", "space gray", "ios", "excellent condition", "5g", "triple camera"]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 1500, // Increased for more detailed descriptions
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 1500, // Increased for more detailed descriptions
+        messages: [{ role: 'user', content: prompt }],
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
+      },
+    }
+  );
 
   const textContent = response.content.find(c => c.type === 'text');
   if (!textContent || textContent.type !== 'text') {

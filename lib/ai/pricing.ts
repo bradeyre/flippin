@@ -1,4 +1,5 @@
 import { anthropic, CLAUDE_MODEL } from './client';
+import { retryWithBackoff } from '@/lib/utils/retry';
 import { roundToFriendly } from '@/lib/utils/pricing';
 
 export interface PricingResult {
@@ -76,19 +77,34 @@ For the condition ${condition}:
 - FAIR: 35-55% of retail
 - POOR: 20-35% of retail`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 2048,
-    messages: [{ role: 'user', content: prompt }],
-    tools: [
-      {
-        type: 'web_search_20250514' as any,
-        name: 'web_search',
-        display_name: 'Web Search',
-        display_number: 1,
-      }
-    ] as any,
-  });
+  // Use retry logic with exponential backoff for rate limits
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+        tools: [
+          {
+            type: 'web_search_20250514' as any,
+            name: 'web_search',
+            display_name: 'Web Search',
+            display_number: 1,
+          }
+        ] as any,
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
+      },
+    }
+  );
 
   // Extract text content from response
   const textBlocks = response.content.filter(c => c.type === 'text');

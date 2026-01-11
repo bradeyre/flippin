@@ -1,4 +1,5 @@
 import { anthropic, CLAUDE_MODEL } from './client';
+import { retryWithBackoff } from '@/lib/utils/retry';
 
 export async function matchBuyOrderToListing(
   buyOrder: {
@@ -50,11 +51,25 @@ Consider:
 
 Return ONLY the number (e.g., 0.95)`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 10,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 10,
+        messages: [{ role: 'user', content: prompt }],
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
+      },
+    }
+  );
 
   const textContent = response.content.find(c => c.type === 'text');
   if (!textContent || textContent.type !== 'text') {

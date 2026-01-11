@@ -1,5 +1,6 @@
 import { anthropic, CLAUDE_MODEL } from './client';
 import { VisionAnalysisResult } from './vision';
+import { retryWithBackoff } from '@/lib/utils/retry';
 
 export interface DynamicQuestion {
   id: string;
@@ -91,11 +92,25 @@ Return ONLY valid JSON:
   "reasoning": "These questions help buyers understand exactly what they're getting and the item's condition, leading to faster sales and fewer returns."
 }`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 1500,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }],
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
+      },
+    }
+  );
 
   const textContent = response.content.find(c => c.type === 'text');
   if (!textContent || textContent.type !== 'text') {
@@ -135,11 +150,25 @@ Generate follow-up questions that:
 
 Return ONLY valid JSON in the same format as before.`;
 
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 1000,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const response = await retryWithBackoff(
+    async () => {
+      return await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
+      });
+    },
+    {
+      maxRetries: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+      retryableErrors: (error: any) => {
+        const status = error?.status || error?.statusCode;
+        return status === 429 || (status >= 500 && status < 600);
+      },
+    }
+  );
 
   const textContent = response.content.find(c => c.type === 'text');
   if (!textContent || textContent.type !== 'text') {
