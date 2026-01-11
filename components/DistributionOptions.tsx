@@ -6,15 +6,20 @@ import { Store, Users, Globe } from 'lucide-react';
 interface DistributionOptionsProps {
   selectedOffer: any | null;
   onComplete: (options: { marketplace: boolean; buyerNetwork: boolean }) => void;
+  onError?: (title: string, message: string) => void;
 }
 
-export function DistributionOptions({ selectedOffer, onComplete }: DistributionOptionsProps) {
+export function DistributionOptions({ selectedOffer, onComplete, onError }: DistributionOptionsProps) {
   const [marketplace, setMarketplace] = useState(!selectedOffer);
   const [buyerNetwork, setBuyerNetwork] = useState(false);
 
   function handleSubmit() {
     if (!marketplace && !buyerNetwork && !selectedOffer) {
-      alert('Please select at least one distribution option');
+      if (onError) {
+        onError('Distribution Required', 'Please select at least one distribution option');
+      } else {
+        alert('Please select at least one distribution option');
+      }
       return;
     }
 

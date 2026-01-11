@@ -7,6 +7,8 @@ import { AIAnalysis } from '@/components/AIAnalysis';
 import { QualifyingQuestions } from '@/components/QualifyingQuestions';
 import { InstantOffers } from '@/components/InstantOffers';
 import { DistributionOptions } from '@/components/DistributionOptions';
+import { Modal } from '@/components/Modal';
+import { useModal } from '@/lib/utils/modal';
 
 type Step = 'upload' | 'analyzing' | 'questions' | 'confirm' | 'delivery' | 'offers' | 'distribution' | 'complete';
 
@@ -25,6 +27,7 @@ export default function SellPage() {
   }>({ marketplace: true, buyerNetwork: false });
   const [deliveryMethods, setDeliveryMethods] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false); // Prevent duplicate requests
+  const { modal, showError, showWarning, closeModal } = useModal();
 
   async function handleImagesUploaded(urls: string[]) {
     // Prevent duplicate requests
@@ -54,7 +57,7 @@ export default function SellPage() {
 
         // Handle prohibited items
         if (errorData.error === 'prohibited') {
-          alert(`❌ ${errorData.message}\n\n${errorData.details}`);
+          showError('Item Cannot Be Sold', `${errorData.message}\n\n${errorData.details}`);
           setStep('upload');
           return;
         }
@@ -64,7 +67,7 @@ export default function SellPage() {
           ? `${errorData.error}\n\n${errorData.details}`
           : errorData.error || 'Analysis failed';
         
-        alert(`❌ ${errorMessage}`);
+        showError('Analysis Failed', errorMessage);
         setStep('upload');
         return;
       }
@@ -73,7 +76,10 @@ export default function SellPage() {
 
       // Double-check for prohibition (in case API didn't catch it)
       if (data.visionAnalysis?.prohibited) {
-        alert(`❌ This item cannot be sold on Flippin\n\n${data.visionAnalysis.prohibitionReason}`);
+        showError(
+          'Item Cannot Be Sold',
+          `This item cannot be sold on Flippin\n\n${data.visionAnalysis.prohibitionReason}`
+        );
         setStep('upload');
         return;
       }
@@ -92,7 +98,10 @@ export default function SellPage() {
         error instanceof Error
           ? error.message
           : 'Failed to analyze images. Please try again.';
-      alert(`❌ ${errorMessage}\n\nPlease check your internet connection and try again.`);
+      showError(
+        'Analysis Failed',
+        `${errorMessage}\n\nPlease check your internet connection and try again.`
+      );
       setStep('upload');
     } finally {
       setIsAnalyzing(false);
@@ -138,7 +147,7 @@ export default function SellPage() {
       setStep('offers');
     } catch (error) {
       console.error('Error creating listing:', error);
-      alert('Failed to create listing. Please try again.');
+      showError('Failed to Create Listing', 'Please try again.');
     }
   }
 
@@ -187,7 +196,10 @@ export default function SellPage() {
               <p className="text-gray-600 mb-8">
                 Upload 3-5 clear photos and our AI will do the rest. Seriously, it's that easy.
               </p>
-              <ImageUpload onComplete={handleImagesUploaded} />
+              <ImageUpload 
+          onComplete={handleImagesUploaded}
+          onError={showError}
+        />
             </div>
           )}
 
@@ -293,7 +305,7 @@ export default function SellPage() {
               <button
                 onClick={() => {
                   if (deliveryMethods.length === 0) {
-                    alert('Please select at least one delivery method');
+                    showWarning('Delivery Method Required', 'Please select at least one delivery method');
                     return;
                   }
                   handleConfirmed(confirmedDetails);
@@ -382,6 +394,15 @@ export default function SellPage() {
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 }

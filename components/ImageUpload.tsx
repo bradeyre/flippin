@@ -5,9 +5,10 @@ import { Upload, X, Camera } from 'lucide-react';
 
 interface ImageUploadProps {
   onComplete: (urls: string[]) => void;
+  onError?: (title: string, message: string) => void;
 }
 
-export function ImageUpload({ onComplete }: ImageUploadProps) {
+export function ImageUpload({ onComplete, onError }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,7 +27,11 @@ export function ImageUpload({ onComplete }: ImageUploadProps) {
 
   async function handleUpload() {
     if (previews.length === 0) {
-      alert('Please select at least one image');
+      if (onError) {
+        onError('No Images Selected', 'Please select at least one image');
+      } else {
+        alert('Please select at least one image');
+      }
       return;
     }
 
@@ -67,7 +72,11 @@ export function ImageUpload({ onComplete }: ImageUploadProps) {
         error instanceof Error
           ? error.message
           : 'Failed to upload images. Please try again.';
-      alert(`Upload failed: ${errorMessage}`);
+      if (onError) {
+        onError('Upload Failed', errorMessage);
+      } else {
+        alert(`Upload failed: ${errorMessage}`);
+      }
       setUploading(false);
     }
   }
