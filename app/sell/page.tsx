@@ -329,6 +329,7 @@ export default function SellPage() {
 
           {step === 'distribution' && (
             <DistributionOptions
+              onError={showWarning}
               selectedOffer={selectedOffer}
               onComplete={handleDistributionSelected}
             />
