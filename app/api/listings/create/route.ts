@@ -85,23 +85,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate listing copy (title, description)
-    const listingCopy = await generateListingCopy(analysis, confirmedDetails.specs);
+    // Use user-provided listing copy if available, otherwise generate it
+    let listingCopy;
+    if (confirmedDetails.listingCopy && confirmedDetails.listingCopy.title) {
+      listingCopy = confirmedDetails.listingCopy;
+    } else {
+      listingCopy = await generateListingCopy(analysis, JSON.stringify(confirmedDetails.specs || {}));
+    }
 
-    // Determine asking price
-    // Use pricing.recommended if available, otherwise use a default calculation
-    let askingPrice = pricing?.recommended;
+    // Determine asking price - prioritize user input
+    let askingPrice = confirmedDetails.askingPrice;
+    
+    // If user didn't provide a price, use AI suggestion or fallback
     if (!askingPrice) {
-      // Fallback: use a simple calculation based on condition
-      const conditionMultipliers: Record<string, number> = {
-        NEW: 0.90,
-        LIKE_NEW: 0.75,
-        GOOD: 0.60,
-        FAIR: 0.45,
-        POOR: 0.25,
-      };
-      // This is a fallback - in production, we should always have pricing
-      askingPrice = 10000 * (conditionMultipliers[analysis.condition] || 0.60);
+      askingPrice = pricing?.recommended;
+      
+      if (!askingPrice) {
+        // Fallback: use a simple calculation based on condition
+        const conditionMultipliers: Record<string, number> = {
+          NEW: 0.90,
+          LIKE_NEW: 0.75,
+          GOOD: 0.60,
+          FAIR: 0.45,
+          POOR: 0.25,
+        };
+        // This is a fallback - in production, we should always have pricing
+        askingPrice = 10000 * (conditionMultipliers[analysis.condition] || 0.60);
+      }
     }
 
     // Apply friendly pricing to asking price

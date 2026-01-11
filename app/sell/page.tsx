@@ -145,7 +145,11 @@ export default function SellPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrls,
-          confirmedDetails: details,
+          confirmedDetails: {
+            ...details,
+            askingPrice: details.askingPrice, // User-set price
+            listingCopy: details.listingCopy, // User-edited listing copy
+          },
           analysis, // Pass full analysis
           pricing, // Pass pricing data
           province: 'GAUTENG', // TODO: Get from user
@@ -177,7 +181,7 @@ export default function SellPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Progress Steps */}
         <div className="mb-12">
@@ -209,11 +213,11 @@ export default function SellPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-10">
           {step === 'upload' && (
             <div>
-              <h1 className="text-3xl font-bold mb-4">Sell Your Stuff</h1>
-              <p className="text-gray-600 mb-8">
+              <h1 className="text-4xl font-bold mb-3 text-gray-900 tracking-tight">Sell Your Stuff</h1>
+              <p className="text-lg text-gray-700 mb-8 font-medium">
                 Upload 3-5 clear photos and our AI will do the rest. Seriously, it's that easy.
               </p>
               <ImageUpload 
@@ -264,6 +268,7 @@ export default function SellPage() {
               analysis={analysis}
               pricing={pricing}
               answers={answers}
+              productName={productName}
               onConfirm={handleConfirmed}
               onEdit={() => setStep('questions')}
             />

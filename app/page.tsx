@@ -7,12 +7,12 @@ export default function Home() {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
         <div className="text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-6xl font-bold text-gray-900 mb-6 tracking-tight">
             Turn Your Clutter
             <br />
-            <span className="text-orange-600">Into Cash</span>
+            <span className="bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">Into Cash</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto font-medium">
             AI-powered marketplace where serious buyers meet smart sellers.
             Get instant offers or list publicly. Your stuff, your choice.
           </p>
@@ -20,13 +20,13 @@ export default function Home() {
           <div className="flex gap-4 justify-center">
             <Link
               href="/sell"
-              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-lg hover:shadow-xl"
             >
               Sell Something
             </Link>
             <Link
               href="/browse"
-              className="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold border-2 border-gray-300 transition-colors"
+              className="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl text-lg font-bold border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md"
             >
               Browse Deals
             </Link>
