@@ -98,9 +98,12 @@ export default function SellPage() {
       setAnalysis(data.visionAnalysis);
       setPricing(data.pricing);
 
-      if (data.visionAnalysis?.needsMoreInfo) {
+      // Speed optimization: If we have product name and analysis is confident, 
+      // we can skip questions or show them faster
+      if (data.visionAnalysis?.needsMoreInfo && data.visionAnalysis?.confidence < 0.7) {
         setStep('questions');
       } else {
+        // High confidence or product name provided - skip questions or make them optional
         setStep('confirm');
       }
     } catch (error) {
