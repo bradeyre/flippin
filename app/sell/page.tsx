@@ -226,10 +226,24 @@ export default function SellPage() {
           {step === 'analyzing' && (
             <div className="text-center py-12">
               <Loader2 className="w-16 h-16 animate-spin text-orange-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">AI is analyzing your item...</h2>
-              <p className="text-gray-600">
-                Identifying product, checking condition, and finding the best price
+              <h2 className="text-2xl font-bold mb-2">AI is analyzing your {productName || 'item'}...</h2>
+              <p className="text-gray-600 mb-4">
+                Identifying product details, checking condition, and finding the best price
               </p>
+              <div className="max-w-md mx-auto space-y-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse" />
+                  <span>Analyzing photos...</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                  <span>Detecting brand and model...</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                  <span>Assessing condition...</span>
+                </div>
+              </div>
             </div>
           )}
 
